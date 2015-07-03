@@ -6,4 +6,5 @@
     <string name="title_activity_login">Login</string>
     <string name="title_activity_register">Register</string>
     <string name="title_activity_opening">OpeningActivity</string>
+    <string name="title_activity_search">SearchActivity</string>
 </resources>

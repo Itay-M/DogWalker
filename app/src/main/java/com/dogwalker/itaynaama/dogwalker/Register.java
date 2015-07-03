@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -49,15 +50,20 @@ public class Register extends ActionBarActivity implements View.OnClickListener
 
                 //new user creation.
                 ParseUser user = new ParseUser();
-                user.setUsername(usernameET.toString());
-                user.setPassword(passwordET.toString());
-                user.setEmail(emailET.toString());
-                user.put("Name", nameET.toString());
-                user.put("City", cityET.toString());
+                //retrieve data from the EditText objects and place it as the user data.
+                user.setUsername(usernameET.getText().toString());
+                user.setPassword(passwordET.getText().toString());
+                user.setEmail(emailET.getText().toString());
+                user.put("Name", nameET.getText().toString());
+                user.put("City", cityET.getText().toString());
 
+//                Log.d("my", nameET.getText().toString());
+
+                //register the new user in Parse database.
                 user.signUpInBackground(new SignUpCallback()
                 {
-                    public void done(final ParseException e) {
+                    public void done(final ParseException e)
+                    {
                         if (e == null)
                         {
                             // Hooray! the user created successfully.
@@ -66,11 +72,9 @@ public class Register extends ActionBarActivity implements View.OnClickListener
                             alert.setTitle("New User");//set the alert title.
                             alert.setMessage("User created successfully");//set the alert message.
                             alert.setCancelable(true);//set the back button to exit the alert.
-                            alert.setButton("OK", new DialogInterface.OnClickListener()
-                            {
+                            alert.setButton("OK", new DialogInterface.OnClickListener() {
                                 @Override
-                                public void onClick(DialogInterface dialog, int which)
-                                {
+                                public void onClick(DialogInterface dialog, int which) {
                                     alert.cancel();//exit the alert.
                                     Intent registerIntent = new Intent(Register.this, MainActivity.class);
                                     startActivity(registerIntent);
@@ -81,10 +85,8 @@ public class Register extends ActionBarActivity implements View.OnClickListener
                         }
                         else
                         {
-                            // Sign up didn't succeed. Look at the ParseException
-                            // to figure out what went wrong
-
-
+                            // Sign up didn't succeed, Look at the ParseException to figure out what went wrong.
+                            //in addition prompt alert for the unsuccessful registration.
                             final AlertDialog alert = new AlertDialog.Builder(Register.this).create();
                             alert.setTitle("New User Error");//set the alert title.
                             alert.setMessage("User creation failed!");//set the alert message.
@@ -94,24 +96,20 @@ public class Register extends ActionBarActivity implements View.OnClickListener
                                 @Override
                                 public void onClick(DialogInterface dialog, int which)
                                 {
+//                                    Log.e("eeee",e.getMessage());
+
                                     alert.cancel();//exit the alert.
-                                    e.printStackTrace();
                                     finish();
                                     startActivity(getIntent());
-
-//                                    Intent registerIntent = new Intent(Register.this, MainActivity.class);
-//                                    startActivity(registerIntent);
                                 }
                             });
 
                             alert.show();
-
                         }
                     }
                 });
 
                 break;
         }
-
     }
 }
