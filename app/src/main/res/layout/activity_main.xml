@@ -24,6 +24,9 @@
         android:layout_marginTop="80dp"
         android:text="search \nwalker"/>
 
+
+
+
     <!--
     <TextView
         android:text="Name"

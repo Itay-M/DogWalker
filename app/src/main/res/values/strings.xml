@@ -1,10 +1,13 @@
 <resources>
     <string name="app_name">Dog Walker</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_login">Login</string>
     <string name="title_activity_register">Register</string>
-    <string name="title_activity_opening">OpeningActivity</string>
-    <string name="title_activity_search">SearchActivity</string>
+    <string name="title_activity_opening">sign in or register</string>
+    <string name="title_activity_search">Search dog walker</string>
+
+    <!-- action bar strings -->
+    <string name="action_edit_profile">Edit profile</string>
+
 </resources>

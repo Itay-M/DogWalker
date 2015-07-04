@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.preference.PreferenceManager;
+import android.support.annotation.StringRes;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -29,7 +31,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        ParseUser.logOut();//this loges out the user
 
         theSearchButton = (Button) findViewById(R.id.searchButton);
         theSearchButton.setOnClickListener(this);
@@ -38,6 +39,14 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         Parse.initialize(this, "e1dj65Ni0LxqLAMpkS6USfFn72rPAOoajEOARnX2", "IcJnYSSt3oVTJQOwPycUhONhQ5N8qdx40kuIbujP");
 
         ParseUser currentUser = ParseUser.getCurrentUser();
+        Resources res = getResources();
+
+        setTitle((CharSequence) currentUser.getUsername());//set the title in the action bar to be the username.
+
+
+//        ParseUser.logOut();//this loges out the user
+
+
         if (currentUser != null)
         {
             Log.d("My Loggggg", "user exists and logged in");
@@ -71,6 +80,13 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
     }
 
+        @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
 }
 
 
@@ -90,12 +106,7 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
 
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        getMenuInflater().inflate(R.menu.menu_main, menu);
-//        return true;
-//    }
+
 //
 //    @Override
 //    public boolean onOptionsItemSelected(MenuItem item) {
