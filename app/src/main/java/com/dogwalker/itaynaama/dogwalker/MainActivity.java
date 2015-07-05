@@ -87,6 +87,38 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
+    /**
+     * Handle action bar item clicks.
+     * @param item - menu item.
+     * @return true if item was clicked.
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+
+        switch(item.getItemId())
+        {
+            case R.id.action_settings:
+                return true;
+
+            case R.id.edit_profile_action:
+                editProfile();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+    }
+
+    /**
+     * Edit user's profile.
+     */
+    private void editProfile()
+    {
+
+    }
 }
 
 
@@ -108,17 +140,3 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
 
 
 //
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        // Handle action bar item clicks here. The action bar will
-//        // automatically handle clicks on the Home/Up button, so long
-//        // as you specify a parent activity in AndroidManifest.xml.
-//        int id = item.getItemId();
-//
-//        //noinspection SimplifiableIfStatement
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
