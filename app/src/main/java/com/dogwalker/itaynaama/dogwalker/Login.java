@@ -50,6 +50,7 @@ public class Login extends ActionBarActivity implements View.OnClickListener
                 if(userExists(usernameET.getText().toString(),passwordET.getText().toString()))
                 {
                     saveLoginPref();
+
                     Intent i = new Intent(this, MainActivity.class);
                     startActivity(i);
                 }
@@ -87,7 +88,8 @@ public class Login extends ActionBarActivity implements View.OnClickListener
     private void saveLoginPref()
     {
         SharedPreferences loginPref = PreferenceManager.getDefaultSharedPreferences(this);
-        loginPref.edit().putBoolean("ISLOGIN",true).commit();
+        SharedPreferences.Editor editor = loginPref.edit();
+        editor.putBoolean("USEREXISTS",true).commit();
     }
 }
 

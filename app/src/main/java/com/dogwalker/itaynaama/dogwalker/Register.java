@@ -3,6 +3,8 @@ package com.dogwalker.itaynaama.dogwalker;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -21,7 +23,7 @@ public class Register extends ActionBarActivity implements View.OnClickListener
 {
     Button registerB;
     EditText nameET,usernameET,emailET,cityET,passwordET;
-
+    SharedPreferences userPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -37,6 +39,8 @@ public class Register extends ActionBarActivity implements View.OnClickListener
         passwordET = (EditText)findViewById(R.id.regPasswordEditText);
 
         registerB.setOnClickListener(this);
+
+        userPref = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
 
@@ -76,6 +80,10 @@ public class Register extends ActionBarActivity implements View.OnClickListener
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     alert.cancel();//exit the alert.
+                                    //save the fact that there is a current user.
+                                    SharedPreferences.Editor editor = userPref.edit();
+                                    editor.putBoolean("USEREXISTS",true).commit();
+                                    //go to main activity.
                                     Intent registerIntent = new Intent(Register.this, MainActivity.class);
                                     startActivity(registerIntent);
                                 }
