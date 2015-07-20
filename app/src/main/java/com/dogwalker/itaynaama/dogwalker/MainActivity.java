@@ -1,10 +1,14 @@
 package com.dogwalker.itaynaama.dogwalker;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -67,9 +71,43 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         switch (v.getId())
         {
             case (R.id.searchButton):
-                Intent i = new Intent(this, SearchActivity.class);
-                startActivity(i);
+//                Intent i = new Intent(this, SearchActivity.class);
+//                startActivity(i);
 
+                // Acquire a reference to the system Location Manager
+                LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+                boolean gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+                if (!gps_enabled)
+                {
+                    final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+                    alertBuilder.setMessage("enable GPS?")
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which)
+                                {
+                                    Intent gpsOptionsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                    startActivity(gpsOptionsIntent);
+                                }
+                            })
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which)
+                                {
+                                    Log.d("My Loggggg", "user canceled");
+                                }
+                            });
+                    alertBuilder.show();
+
+                }
+                else
+                {
+                    Intent i = new Intent(this, SearchActivity.class);
+                    startActivity(i);
+                }
 
         }
     }

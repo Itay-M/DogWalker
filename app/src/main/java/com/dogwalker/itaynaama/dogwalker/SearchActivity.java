@@ -32,7 +32,7 @@ public class SearchActivity extends ActionBarActivity implements GoogleApiClient
                 .build();
 
 
-        mGoogleApiClient.connect();
+//        mGoogleApiClient.connect();
     }
 
     @Override
@@ -40,10 +40,7 @@ public class SearchActivity extends ActionBarActivity implements GoogleApiClient
     {
         super.onStart();
 
-        if (true)
-        {
-            mGoogleApiClient.connect();
-        }
+        mGoogleApiClient.connect();
     }
 
     @Override
