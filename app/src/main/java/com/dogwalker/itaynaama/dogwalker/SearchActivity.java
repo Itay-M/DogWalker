@@ -10,14 +10,17 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 
-public class SearchActivity extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener
+public class SearchActivity extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
 {
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
     private TextView t;
+    private LocationRequest mlocationRequest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -39,7 +42,7 @@ public class SearchActivity extends ActionBarActivity implements GoogleApiClient
     protected void onStart()
     {
         super.onStart();
-
+        t = (TextView)findViewById(R.id.latitudeTextView);
         mGoogleApiClient.connect();
     }
 
@@ -81,14 +84,17 @@ public class SearchActivity extends ActionBarActivity implements GoogleApiClient
         // Connected to Google Play services!
         // The good stuff goes here.
 
+        mlocationRequest = LocationRequest.create();
+        mlocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mlocationRequest.setInterval(10000);//update location every 10 second.
 
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-//        if (mLastLocation != null)
-//        {
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,mlocationRequest,this);
+//        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-        Log.d("My Loggggg", "latitude-" + mLastLocation.getLatitude());
-            t = (TextView)findViewById(R.id.latitudeTextView);
-            t.setText(String.valueOf(mLastLocation.getLatitude()));
+
+//        Log.d("My Loggggg", "latitude-" + mLastLocation.getLatitude());
+//            t = (TextView)findViewById(R.id.latitudeTextView);
+//            t.setText(String.valueOf(mLastLocation.getLatitude()));
 
 
 //            mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
@@ -111,6 +117,14 @@ public class SearchActivity extends ActionBarActivity implements GoogleApiClient
         // may occur while attempting to connect with Google.
         //
         // More about this in the 'Handle Connection Failures' section.
+        Log.d("My Loggggg", "faillllll");
     }
 
+    @Override
+    public void onLocationChanged(Location location)
+    {
+        Log.d("My Loggggg", "latitude-" + location.toString());
+        t.setText(String.valueOf(location.toString()));
+
+    }
 }
