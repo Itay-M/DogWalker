@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,7 +20,7 @@ import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 
 
-public class Register extends ActionBarActivity implements View.OnClickListener
+public class Register extends AppCompatActivity implements View.OnClickListener
 {
     Button registerB;
     EditText nameET,usernameET,emailET,cityET,passwordET;
@@ -60,8 +61,6 @@ public class Register extends ActionBarActivity implements View.OnClickListener
                 user.setEmail(emailET.getText().toString());
                 user.put("Name", nameET.getText().toString());
                 user.put("City", cityET.getText().toString());
-
-//                Log.d("my", nameET.getText().toString());
 
                 //register the new user in Parse database.
                 user.signUpInBackground(new SignUpCallback()
@@ -104,7 +103,6 @@ public class Register extends ActionBarActivity implements View.OnClickListener
                                 @Override
                                 public void onClick(DialogInterface dialog, int which)
                                 {
-//                                    Log.e("eeee",e.getMessage());
 
                                     alert.cancel();//exit the alert.
                                     finish();

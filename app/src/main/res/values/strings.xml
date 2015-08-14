@@ -6,6 +6,9 @@
     <string name="title_activity_register">Register</string>
     <string name="title_activity_opening">sign in or register</string>
     <string name="title_activity_search">Search dog walker</string>
+    <string name="ApplicationID">e1dj65Ni0LxqLAMpkS6USfFn72rPAOoajEOARnX2</string>
+    <string name="ClientKey">IcJnYSSt3oVTJQOwPycUhONhQ5N8qdx40kuIbujP</string>
+
 
     <!-- action bar strings -->
     <string name="action_edit_profile">Edit profile</string>

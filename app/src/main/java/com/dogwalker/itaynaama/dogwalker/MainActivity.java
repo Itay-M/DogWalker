@@ -9,23 +9,18 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import com.parse.Parse;
 import com.parse.ParseUser;
 
 
-
-public class MainActivity extends ActionBarActivity implements View.OnClickListener
+public class MainActivity extends AppCompatActivity implements View.OnClickListener
 {
     Button theSearchButton;
-//    GoogleApiClient mGooleApiClient;
-//    Location theLastLocation;
-
-//    boolean thereIsAUser = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -33,36 +28,11 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //button setup.
+        //button setup
         theSearchButton = (Button) findViewById(R.id.searchButton);
         theSearchButton.setOnClickListener(this);
-
-        //initialize parse for using data control.
-        Parse.initialize(this, "e1dj65Ni0LxqLAMpkS6USfFn72rPAOoajEOARnX2", "IcJnYSSt3oVTJQOwPycUhONhQ5N8qdx40kuIbujP");
-        SharedPreferences anyUserExists = PreferenceManager.getDefaultSharedPreferences(this);
-
-//        SharedPreferences.Editor editor = anyUserExists.edit();
-//        editor.putBoolean("USEREXISTS",thereIsAUser).commit();
-
-
-        boolean b = anyUserExists.getBoolean("USEREXISTS", false);
-
-        if (!b)
-        {
-            Log.d("My Loggggg", "there is no current user, referring to login or register activity...");
-            Intent i = new Intent(this, OpeningActivity.class);
-            startActivity(i);
-        }
-        else
-        {
-            ParseUser currentUser = ParseUser.getCurrentUser();
-            setTitle(currentUser.getUsername());//set the title in the action bar to be the username.
-            Log.d("My Loggggg", "user exists and logged in");
-            Log.d("My Loggggg", "the username that logged in is - " + currentUser.getUsername().toString());
-
-
-        }
-
+        //check if there is a current user logged in
+        currentUserHandle();
     }
 
     @Override
@@ -71,14 +41,11 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
         switch (v.getId())
         {
             case (R.id.searchButton):
-//                Intent i = new Intent(this, SearchActivity.class);
-//                startActivity(i);
-
                 // Acquire a reference to the system Location Manager
                 LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-
+                // check if the device's gps is turned on
                 boolean gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-
+                // if gps isn't turned on - ask the user if he/she wants to activate it
                 if (!gps_enabled)
                 {
                     final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
@@ -101,14 +68,12 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                                 }
                             });
                     alertBuilder.show();
-
                 }
                 else
                 {
                     Intent i = new Intent(this, SearchActivity.class);
                     startActivity(i);
                 }
-
         }
     }
 
@@ -117,7 +82,6 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
     protected void onStop()
     {
         super.onStop();
-
     }
 
         @Override
@@ -150,6 +114,31 @@ public class MainActivity extends ActionBarActivity implements View.OnClickListe
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+
+    /**
+     * Check if there is a current user logged in.
+     * yes - handle the current user and puts it's name in the action bar.
+     * No - go to OpeningActivity for login or register.
+     */
+    private void currentUserHandle()
+    {
+        SharedPreferences anyUserExists = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean currentUserExists = anyUserExists.getBoolean("USEREXISTS", false);
+
+        if (!currentUserExists)
+        {
+            Log.d("My Loggggg", "there is no current user, referring to login or register activity...");
+            Intent i = new Intent(this, OpeningActivity.class);
+            startActivity(i);
+        }
+        else
+        {
+            ParseUser currentUser = ParseUser.getCurrentUser();
+            setTitle(currentUser.getUsername());//set the title in the action bar to be the username.
+            Log.d("My Loggggg", "user exists and logged in");
+            Log.d("My Loggggg", "the username that logged in is - " + currentUser.getUsername());
+        }
     }
 
     /**

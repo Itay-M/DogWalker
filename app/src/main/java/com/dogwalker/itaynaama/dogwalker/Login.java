@@ -7,20 +7,24 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+import com.parse.LogInCallback;
+import com.parse.ParseException;
+import com.parse.ParseUser;
 
 
-public class Login extends ActionBarActivity implements View.OnClickListener
+public class Login extends AppCompatActivity implements View.OnClickListener
 {
 
     Button loginB;
     EditText usernameET;
     EditText passwordET;
-//    boolean isLogin;
+    SharedPreferences userPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -35,62 +39,51 @@ public class Login extends ActionBarActivity implements View.OnClickListener
         //reference the login button from the activity to this button.
         passwordET = (EditText)findViewById(R.id.passwordEditText);
 
-
         loginB.setOnClickListener(this);
-
     }
 
     @Override
     public void onClick(View v)
     {
-
         switch (v.getId())
         {
             case R.id.loginButton:
-                if(userExists(usernameET.getText().toString(),passwordET.getText().toString()))
+                //perform login using the username and password typed in the EditTexts, matching it to the Parse database.
+                ParseUser.logInInBackground(usernameET.getText().toString(), passwordET.getText().toString(), new LogInCallback()
                 {
-                    saveLoginPref();
-
-                    Intent i = new Intent(this, MainActivity.class);
-                    startActivity(i);
-                }
-                else
-                {
-                    // create and prompt alert if the user wasn't found.
-                    final AlertDialog alert = new AlertDialog.Builder(this).create();
-                    alert.setTitle("ALERT");//set the alert title.
-                    alert.setMessage("user invalid");//set the alert message.
-                    alert.setCancelable(true);//set the back button to exit the alert.
-                    alert.setButton("OK", new DialogInterface.OnClickListener()
+                    @Override
+                    public void done(ParseUser parseUser, ParseException e)
                     {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
+                        if (e == null)
                         {
-                            alert.cancel();//exit the alert.
+                            saveLoginPref();
+                            Toast.makeText(getApplicationContext(), "user logged in successfully", Toast.LENGTH_LONG).show();
+                            Intent i = new Intent(Login.this, MainActivity.class);
+                            startActivity(i);
+                            finish();
                         }
-                    });
+                        else
+                        {
+                            Toast.makeText(getApplicationContext(), "no such user exist", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                });
 
-                    alert.show();
-                }
                 break;
         }
-
-
     }
 
-    private boolean userExists(String theUsername,String thePassword)
-    {
-        //////////
 
-        return false;
-    }
-
+    /**
+     * save the status of current user exists to SharedPreferences.
+     */
     private void saveLoginPref()
     {
         SharedPreferences loginPref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = loginPref.edit();
         editor.putBoolean("USEREXISTS",true).commit();
     }
+
 }
 
 

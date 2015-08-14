@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
+        android:name="ParseAppInit"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -23,12 +24,10 @@
             android:name=".MainActivity"
             android:label="@string/app_name" >
 
-            <!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            -->
         </activity>
         <activity
             android:name=".Login"
@@ -47,20 +46,16 @@
             android:label="@string/title_activity_search" >
         </activity>
         <activity
-            android:name=".TestActivity"
-            android:label="@string/title_activity_test" >
-        </activity>
-        <activity
             android:name=".AddressSelectionActivity"
             android:label="@string/title_activity_address_selection" >
         </activity>
         <activity
             android:name=".WalkerSearchActivity"
             android:label="@string/title_activity_walker_search" >
-            <intent-filter>
+            <!--<intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            </intent-filter>-->
         </activity>
     </application>
 
