@@ -9,5 +9,13 @@
 
     <!-- action bar strings -->
     <string name="action_edit_profile">Edit profile</string>
+    <string name="title_activity_test">TestActivity</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_address_selection">Address Selection</string>
+    <string name="address_textfield_hint">Enter full address</string>
+    <string name="title_activity_walker_search">Search for a Walker</string>
+    <string name="walker_search_location_label">Pickup loaction:</string>
+    <string name="walker_search_loc_btn_hint">Choose pickup address</string>
 
 </resources>
