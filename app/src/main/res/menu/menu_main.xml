@@ -9,15 +9,5 @@
           android:orderInCategory="100"
           app:showAsAction="never" />
 
-    <item android:id="@+id/edit_profile_action"
-          android:title="@string/action_edit_profile"
-          android:orderInCategory="90"
-          app:showAsAction="never" />
 
-
-
-    <item android:id="@+id/action_search"
-          android:title="@string/abc_search_hint"
-          android:icon="@drawable/abc_ic_search_api_mtrl_alpha"
-          app:showAsAction="ifRoom"/>
 </menu>

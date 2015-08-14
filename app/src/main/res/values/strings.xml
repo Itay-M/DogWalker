@@ -13,8 +13,8 @@
     <!-- action bar strings -->
     <string name="action_edit_profile">Edit profile</string>
     <string name="title_activity_test">TestActivity</string>
+    <string name="action_logout">Log out</string>
 
-    <string name="hello_world">Hello world!</string>
     <string name="title_activity_address_selection">Address Selection</string>
     <string name="address_textfield_hint">Enter full address</string>
     <string name="title_activity_walker_search">Search for a Walker</string>

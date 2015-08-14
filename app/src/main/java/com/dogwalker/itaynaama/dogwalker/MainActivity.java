@@ -18,7 +18,7 @@ import android.widget.Button;
 import com.parse.ParseUser;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener
+public class MainActivity extends BaseActivity implements View.OnClickListener
 {
     Button theSearchButton;
 
@@ -84,37 +84,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onStop();
     }
 
-        @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+//        @Override
+//    public boolean onCreateOptionsMenu(Menu menu)
+//    {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        getMenuInflater().inflate(R.menu.menu_main, menu);
+//        return true;
+//    }
 
     /**
      * Handle action bar item clicks.
      * @param item - menu item.
      * @return true if item was clicked.
      */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-
-        switch(item.getItemId())
-        {
-            case R.id.action_settings:
-                return true;
-
-            case R.id.edit_profile_action:
-                editProfile();
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-
-    }
+//    @Override
+//    public boolean onOptionsItemSelected(MenuItem item)
+//    {
+//
+//        switch(item.getItemId())
+//        {
+//            case R.id.action_settings:
+//                return true;
+//
+//            case R.id.edit_profile_action:
+//                editProfile();
+//                return true;
+//
+//            default:
+//                return super.onOptionsItemSelected(item);
+//        }
+//
+//    }
 
     /**
      * Check if there is a current user logged in.
@@ -141,13 +141,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    /**
-     * Edit user's profile.
-     */
-    private void editProfile()
-    {
 
-    }
 
 }
 
