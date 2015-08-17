@@ -29,26 +29,32 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".Login"
             android:label="@string/title_activity_login" >
         </activity>
+
         <activity
             android:name=".Register"
             android:label="@string/title_activity_register" >
         </activity>
+
         <activity
             android:name=".OpeningActivity"
             android:label="@string/title_activity_opening" >
         </activity>
+
         <activity
             android:name=".SearchActivity"
             android:label="@string/title_activity_search" >
         </activity>
+
         <activity
             android:name=".AddressSelectionActivity"
             android:label="@string/title_activity_address_selection" >
         </activity>
+
         <activity
             android:name=".WalkerSearchActivity"
             android:label="@string/title_activity_walker_search" >
@@ -59,10 +65,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             -->
-        </activity>
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings" >
         </activity>
     </application>
 
