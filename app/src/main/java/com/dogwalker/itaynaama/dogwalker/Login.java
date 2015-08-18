@@ -1,12 +1,10 @@
 package com.dogwalker.itaynaama.dogwalker;
 
-import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -26,7 +24,6 @@ public class Login extends AppCompatActivity implements View.OnClickListener
     Button forgotPassB;
     EditText usernameET;
     EditText passwordET;
-    SharedPreferences userPref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -80,7 +77,6 @@ public class Login extends AppCompatActivity implements View.OnClickListener
                 //perform user password reset by sending a password reset request using provided email address.
                 final android.support.v7.app.AlertDialog.Builder alertBuilder = new android.support.v7.app.AlertDialog.Builder(this);
                 final EditText input = new EditText(this);
-//                input.setId(0);
 
                 alertBuilder.setMessage("Do you want to reset your password \n(sending reset to your mail)")
                         .setPositiveButton("Send reset", new DialogInterface.OnClickListener()
@@ -130,10 +126,3 @@ public class Login extends AppCompatActivity implements View.OnClickListener
     }
 
 }
-
-
-
-
-//                    AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-//                    dialogBuilder.setMessage("invalid user");//the alert to be prompt.
-//                    dialogBuilder.setCancelable(true);// back button can exit the alert.

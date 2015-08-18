@@ -11,7 +11,7 @@
 
 
     <!-- action bar strings -->
-    <string name="action_edit_profile">Edit profile</string>
+    <string name="action_edit_profile">View profile</string>
     <string name="title_activity_test">TestActivity</string>
     <string name="action_logout">Log out</string>
 
@@ -20,5 +20,8 @@
     <string name="title_activity_walker_search">Search for a Walker</string>
     <string name="walker_search_location_label">Pickup loaction:</string>
     <string name="walker_search_loc_btn_hint">Choose pickup address</string>
+    <string name="title_activity_profile_view">ProfileView</string>
+
+    <string name="hello_world">Hello world!</string>
 
 </resources>
