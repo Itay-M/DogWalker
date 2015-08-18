@@ -24,6 +24,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //hide the actionBar's back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         //button setup
         theSearchButton = (Button) findViewById(R.id.searchButton);
         theSearchButton.setOnClickListener(this);
@@ -105,6 +107,10 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         }
     }
 
+
+    /**
+     * when the back button pressed, the user asked if he wants to exit the app.
+     */
     @Override
     public void onBackPressed()
     {
@@ -131,5 +137,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
                 });
         alertBuilder.show();
     }
+
 }
 

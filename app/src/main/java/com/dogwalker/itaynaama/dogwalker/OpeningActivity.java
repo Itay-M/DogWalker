@@ -79,6 +79,9 @@ public class OpeningActivity extends Activity implements View.OnClickListener
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * when the back button pressed, the user asked if he wants to exit the app.
+     */
     @Override
     public void onBackPressed()
     {

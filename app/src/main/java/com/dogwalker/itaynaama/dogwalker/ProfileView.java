@@ -1,11 +1,11 @@
 package com.dogwalker.itaynaama.dogwalker;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
+
 import com.parse.ParseUser;
 
-public class ProfileView extends AppCompatActivity
+public class ProfileView extends BaseActivity
 {
 
     TextView name,userName,userCity;
@@ -24,7 +24,7 @@ public class ProfileView extends AppCompatActivity
     }
 
     /**
-     * present the user details.
+     * present the user's details.
      */
     private void fetchDetails()
     {
