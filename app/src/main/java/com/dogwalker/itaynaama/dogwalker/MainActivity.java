@@ -7,18 +7,14 @@ import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import com.parse.ParseUser;
 
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener
+public class MainActivity extends BaseActivity implements View.OnClickListener
 {
     Button theSearchButton;
 
@@ -28,6 +24,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //hide the actionBar's back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         //button setup
         theSearchButton = (Button) findViewById(R.id.searchButton);
         theSearchButton.setOnClickListener(this);
@@ -84,38 +82,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onStop();
     }
 
-        @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    /**
-     * Handle action bar item clicks.
-     * @param item - menu item.
-     * @return true if item was clicked.
-     */
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-
-        switch(item.getItemId())
-        {
-            case R.id.action_settings:
-                return true;
-
-            case R.id.edit_profile_action:
-                editProfile();
-                return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-
-    }
-
     /**
      * Check if there is a current user logged in.
      * yes - handle the current user and puts it's name in the action bar.
@@ -141,12 +107,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    /**
-     * Edit user's profile.
-     */
-    private void editProfile()
-    {
 
+    /**
+     * when the back button pressed, the user asked if he wants to exit the app.
+     */
+    @Override
+    public void onBackPressed()
+    {
+        final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setMessage("Do you want to exit the app?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        moveTaskToBack(true);
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                        System.exit(1);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        Log.d("My Loggggg", "user canceled");
+
+                    }
+                });
+        alertBuilder.show();
     }
 
 }

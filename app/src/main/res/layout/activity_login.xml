@@ -45,6 +45,16 @@
         android:layout_height="wrap_content"
         android:inputType="textPassword"/>
 
+    <Button
+        android:id="@+id/forgotPasswordButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:text="forgot password"
+        android:textColor="@android:color/holo_blue_dark"
+        android:background="@android:color/transparent"
+
+        android:layout_marginBottom="30dp" />
 
     <Button
         android:id="@+id/loginButton"

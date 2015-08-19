@@ -1,9 +1,11 @@
 package com.dogwalker.itaynaama.dogwalker;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,6 +22,8 @@ public class OpeningActivity extends Activity implements View.OnClickListener
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_opening);
+
+//        Log.d("My Loggggg", "openingActivity onCreate");
 
         registerB = (Button)findViewById(R.id.toRegisterButton);
         signinB = (Button)findViewById(R.id.toSignInButton);
@@ -75,5 +79,34 @@ public class OpeningActivity extends Activity implements View.OnClickListener
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * when the back button pressed, the user asked if he wants to exit the app.
+     */
+    @Override
+    public void onBackPressed()
+    {
+        final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+        alertBuilder.setMessage("Do you want to exit the app?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        moveTaskToBack(true);
+                        android.os.Process.killProcess(android.os.Process.myPid());
+                        System.exit(1);
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        Log.d("My Loggggg", "user canceled");
+
+                    }
+                });
+        alertBuilder.show();
+    }
 
 }

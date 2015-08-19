@@ -1,12 +1,8 @@
 package com.dogwalker.itaynaama.dogwalker;
 
 import android.location.Location;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -15,7 +11,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 
-public class SearchActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
+public class SearchActivity extends BaseActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener
 {
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
@@ -34,8 +30,6 @@ public class SearchActivity extends AppCompatActivity implements GoogleApiClient
                 .addApi(LocationServices.API)
                 .build();
 
-
-//        mGoogleApiClient.connect();
     }
 
     @Override
@@ -55,30 +49,6 @@ public class SearchActivity extends AppCompatActivity implements GoogleApiClient
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_search, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public void onConnected(Bundle bundle)
     {
         // Connected to Google Play services!
@@ -89,17 +59,6 @@ public class SearchActivity extends AppCompatActivity implements GoogleApiClient
         mlocationRequest.setInterval(10000);//update location every 10 second.
 
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient,mlocationRequest,this);
-//        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-
-//        Log.d("My Loggggg", "latitude-" + mLastLocation.getLatitude());
-//            t = (TextView)findViewById(R.id.latitudeTextView);
-//            t.setText(String.valueOf(mLastLocation.getLatitude()));
-
-
-//            mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
-//            mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
-//        }
     }
 
     @Override
