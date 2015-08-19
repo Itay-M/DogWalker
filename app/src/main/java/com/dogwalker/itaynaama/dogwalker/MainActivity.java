@@ -17,7 +17,6 @@ import com.parse.ParseUser;
 public class MainActivity extends BaseActivity implements View.OnClickListener
 {
     Button theSearchButton;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -87,6 +86,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
      * yes - handle the current user and puts it's name in the action bar.
      * No - go to OpeningActivity for login or register.
      */
+
     private void currentUserHandle()
     {
         SharedPreferences anyUserExists = PreferenceManager.getDefaultSharedPreferences(this);
@@ -111,6 +111,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
     /**
      * when the back button pressed, the user asked if he wants to exit the app.
      */
+
     @Override
     public void onBackPressed()
     {
@@ -137,6 +138,4 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
                 });
         alertBuilder.show();
     }
-
 }
-

@@ -10,6 +10,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,27 +20,43 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.parse.FindCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class WalkerSearchActivity extends AppCompatActivity {
     private static final int REQUEST_ADDRESS = 1;
+
+    private static final java.text.DateFormat DISPLAY_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
 
     protected Button locationButton;
     protected Button searchWalker;
     protected TextView dateText;
     protected TextView timeText;
+    protected Date date;
+    protected Time time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walker_search);
 
+        locationButton = (Button)findViewById(R.id.walker_search_location_btn);
+        dateText = (TextView)findViewById(R.id.walker_search_date);
+        timeText = (TextView)findViewById(R.id.walker_search_time);
+        searchWalker = (Button)findViewById(R.id.walker_search_search_btn);
 
         //handle location choosing button
-        locationButton = (Button)findViewById(R.id.walker_search_location_btn);
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -50,39 +67,52 @@ public class WalkerSearchActivity extends AppCompatActivity {
 
 
         // handle date choosing
-        dateText = (TextView)findViewById(R.id.walker_search_date);
+        final DatePickerFragment datePickerFragment = new DatePickerFragment();
+        datePickerFragment.setDateView(dateText);
         dateText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DatePickerFragment newFragment = new DatePickerFragment();
-                newFragment.setDateView(dateText);
-                newFragment.show(getSupportFragmentManager(), "datePicker");
+                datePickerFragment.show(getSupportFragmentManager(), "datePicker");
             }
         });
 
         //handle time choosing
-        timeText = (TextView)findViewById(R.id.walker_search_time);
+        final TimePickerFragment timePickerFragment = new TimePickerFragment();
+        timePickerFragment.setTimeView(timeText);
         timeText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TimePickerFragment newFragment = new TimePickerFragment();
-                newFragment.setTimeView(timeText);
-                newFragment.show(getSupportFragmentManager(), "timePicker");
+                timePickerFragment.show(getSupportFragmentManager(), "timePicker");
             }
         });
 
         //handle search walker button
-        searchWalker = (Button)findViewById(R.id.walker_search_search_btn);
         searchWalker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ParseUser users = new ParseUser();
+                ParseQuery availabilityQuery = new ParseQuery("UserAvailability");
+                availabilityQuery.whereEqualTo("dayOfWeek", datePickerFragment.getDate().get(Calendar.DAY_OF_WEEK));
+                availabilityQuery.whereLessThanOrEqualTo("startTime", timePickerFragment.getTime());
+                availabilityQuery.whereGreaterThanOrEqualTo("endTime", timePickerFragment.getTime());
+                availabilityQuery.selectKeys(Arrays.asList("user"));
+                availabilityQuery.include("user");
+
+                // retrieval all users from DB
+                availabilityQuery.findInBackground(new FindCallback<ParseObject>() {
+                    public void done(List<ParseObject> usersAvailability, ParseException e) {
+                        if (e == null) {
+                            for(final ParseObject userAvailability: usersAvailability){
+                                ParseUser user = userAvailability.getParseUser("user");
+                                Log.d("users",user.getUsername());
+                            }
+                        } else {
+                            Log.d("users", "Error: " + e.getMessage());
+                        }
+                    }
+                });
 
             }
         });
-
-
-
     }
 
     @Override
@@ -124,6 +154,11 @@ public class WalkerSearchActivity extends AppCompatActivity {
             implements DatePickerDialog.OnDateSetListener {
 
         private TextView dateText;
+        private Calendar date;
+
+        public DatePickerFragment(){
+            date = Calendar.getInstance();
+        }
 
         public void setDateView(TextView date){
             this.dateText = date;
@@ -131,17 +166,21 @@ public class WalkerSearchActivity extends AppCompatActivity {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Use the current date as the default date in the picker
-            final Calendar c = Calendar.getInstance();
-            int year = c.get(Calendar.YEAR);
-            int month = c.get(Calendar.MONTH);
-            int day = c.get(Calendar.DAY_OF_MONTH);
+            int year = date.get(Calendar.YEAR);
+            int month = date.get(Calendar.MONTH);
+            int day = date.get(Calendar.DAY_OF_MONTH);
 
             // Create a new instance of DatePickerDialog and return it
             return new DatePickerDialog(getActivity(), this, year, month, day);
         }
 
         public void onDateSet(DatePicker view, int year, int month, int day) {
-           dateText.setText(day+"/"+(month+1)+"/"+year);
+            date.set(year, month, day);
+            dateText.setText(DISPLAY_DATE_FORMAT.format(date.getTime()));
+        }
+
+        public Calendar getDate(){
+            return date;
         }
     }
 
@@ -149,7 +188,14 @@ public class WalkerSearchActivity extends AppCompatActivity {
     public static class TimePickerFragment extends DialogFragment
             implements TimePickerDialog.OnTimeSetListener {
 
+        private static java.text.DateFormat DISPLAY_TIME_FORMAT = new SimpleDateFormat("HH:mm");
         private TextView timeText;
+        private Calendar time;
+
+        public TimePickerFragment(){
+            time = Calendar.getInstance();
+            time.set(Calendar.SECOND,0);
+        }
 
         public void setTimeView(TextView time){
             this.timeText = time;
@@ -158,9 +204,8 @@ public class WalkerSearchActivity extends AppCompatActivity {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Use the current time as the default values for the picker
-            final Calendar c = Calendar.getInstance();
-            int hour = c.get(Calendar.HOUR_OF_DAY);
-            int minute = c.get(Calendar.MINUTE);
+            int hour = time.get(Calendar.HOUR_OF_DAY);
+            int minute = time.get(Calendar.MINUTE);
 
             // Create a new instance of TimePickerDialog and return it
             return new TimePickerDialog(getActivity(), this, hour, minute,
@@ -168,7 +213,16 @@ public class WalkerSearchActivity extends AppCompatActivity {
         }
 
         public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-            timeText.setText(hourOfDay+":"+minute);
+            time.set(Calendar.HOUR_OF_DAY,hourOfDay);
+            time.set(Calendar.MINUTE,minute);
+            timeText.setText(DISPLAY_TIME_FORMAT.format(time.getTime()));
+        }
+
+        /**
+         * Return the time in minutes.
+         */
+        public int getTime(){
+            return time.get(Calendar.HOUR_OF_DAY)*60+time.get(Calendar.MINUTE);
         }
     }
 }
