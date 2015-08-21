@@ -20,6 +20,7 @@
     <string name="title_activity_walker_search">Search for a Walker</string>
     <string name="walker_search_location_label">Pickup loaction:</string>
     <string name="walker_search_loc_btn_hint">Choose pickup address</string>
+    <string name="walker_search_time_label">Choose When</string>
     <string name="title_activity_profile_view">ProfileView</string>
 
     <string name="hello_world">Hello world!</string>

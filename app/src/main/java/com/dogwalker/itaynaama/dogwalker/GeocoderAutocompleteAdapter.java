@@ -55,6 +55,7 @@ public class GeocoderAutocompleteAdapter extends ArrayAdapter<GeocoderAutocomple
                     // Skip the autocomplete query if no constraints are given.
                     if (constraint != null && constraint.length() > 0) {
                         try {
+                            // TODO: limit bounds to Israel only
                             lastAddresses = AddressAutocompleteResult.wrap(geocoder.getFromLocationName(constraint.toString(), 10));
                             results.values = lastAddresses;
                             results.count = lastAddresses.size();

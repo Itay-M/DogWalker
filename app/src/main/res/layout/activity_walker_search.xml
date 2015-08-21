@@ -10,7 +10,7 @@
     android:id="@+id/walker_search_main_layout">
 
     <TextView
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/walker_search_location_label"
@@ -23,6 +23,45 @@
         android:layout_height="wrap_content"
         android:id="@+id/walker_search_location_btn"
         android:layout_gravity="center_horizontal"
-        android:hint="@string/walker_search_loc_btn_hint" />
+        android:hint="@string/walker_search_loc_btn_hint"
+        android:background="#ffffff" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="@string/walker_search_time_label"
+        android:id="@+id/textView2"
+        android:layout_marginTop="10dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="14/08/2015"
+        android:id="@+id/walker_search_date"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="20dp"
+        android:textSize="20pt"
+        android:gravity="center"
+        android:textColor="#79103fff" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/walker_search_time"
+        android:layout_gravity="center_horizontal"
+        android:textSize="20pt"
+        android:text="19:30"
+        android:layout_marginTop="20dp"
+        android:textColor="#79103fff" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="New Button"
+        android:id="@+id/walker_search_search_btn"
+        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>
