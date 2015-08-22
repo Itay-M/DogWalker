@@ -28,7 +28,6 @@ public class SearchActivity extends BaseActivity implements GoogleApiClient.Conn
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-
     }
 
     @Override

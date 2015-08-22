@@ -27,15 +27,18 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import java.io.Serializable;
 import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-public class WalkerSearchActivity extends AppCompatActivity {
+public class WalkerSearchActivity extends BaseActivity {
     private static final int REQUEST_ADDRESS = 1;
+    private static final int REQUEST_USER = 2;
 
     private static final java.text.DateFormat DISPLAY_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
 
@@ -101,10 +104,14 @@ public class WalkerSearchActivity extends AppCompatActivity {
                 availabilityQuery.findInBackground(new FindCallback<ParseObject>() {
                     public void done(List<ParseObject> usersAvailability, ParseException e) {
                         if (e == null) {
+                            ArrayList<ParseUserInfo> users = new ArrayList<>();
                             for(final ParseObject userAvailability: usersAvailability){
                                 ParseUser user = userAvailability.getParseUser("user");
-                                Log.d("users",user.getUsername());
+                                users.add(new ParseUserInfo(user));
                             }
+                            Intent usersSelectionIntent = new Intent(WalkerSearchActivity.this, UserSelctionActivity.class);
+                            usersSelectionIntent.putExtra("users",users);
+                            startActivityForResult(usersSelectionIntent, REQUEST_USER);
                         } else {
                             Log.d("users", "Error: " + e.getMessage());
                         }
@@ -125,28 +132,6 @@ public class WalkerSearchActivity extends AppCompatActivity {
                 }
                 break;
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_walker_search, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     // window to choose date TODO
@@ -224,5 +209,26 @@ public class WalkerSearchActivity extends AppCompatActivity {
         public int getTime(){
             return time.get(Calendar.HOUR_OF_DAY)*60+time.get(Calendar.MINUTE);
         }
+    }
+
+    static public class ParseUserInfo implements Serializable{
+        private String username;
+        private String address;
+
+        public ParseUserInfo(){}
+
+        public ParseUserInfo(ParseUser user){
+            username = user.getUsername();
+            address = user.getString("address");
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public String getUsername() {
+            return username;
+        }
+
     }
 }
