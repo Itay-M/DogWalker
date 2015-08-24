@@ -17,6 +17,7 @@ import com.parse.ParseUser;
 public class MainActivity extends BaseActivity implements View.OnClickListener
 {
     Button theSearchButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {

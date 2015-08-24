@@ -1,5 +1,6 @@
 package com.dogwalker.itaynaama.dogwalker;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -48,7 +49,8 @@ public class ProfileView extends BaseActivity implements View.OnClickListener {
         switch (v.getId())
         {
             case (R.id.edit_profile_button):
-
+                Intent i = new Intent(this, ProfileEdit.class);
+                startActivity(i);
         }
     }
 }
