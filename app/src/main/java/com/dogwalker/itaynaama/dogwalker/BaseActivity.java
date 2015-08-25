@@ -8,6 +8,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.parse.ParseInstallation;
+import com.parse.ParsePush;
 import com.parse.ParseUser;
 
 public class BaseActivity extends AppCompatActivity
@@ -70,6 +72,12 @@ public class BaseActivity extends AppCompatActivity
     {
         Toast.makeText(getApplicationContext(), "Logging out...", Toast.LENGTH_LONG).show();
         ParseUser.logOut();
+
+        // disconnect user from this installation
+        ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+        installation.remove("user");
+        installation.saveEventually();
+
         Intent i = new Intent(this, OpeningActivity.class);
         startActivity(i);
     }

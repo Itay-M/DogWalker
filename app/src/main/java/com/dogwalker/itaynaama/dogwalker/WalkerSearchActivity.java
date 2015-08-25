@@ -1,9 +1,11 @@
 package com.dogwalker.itaynaama.dogwalker;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
 
 import android.app.TimePickerDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Address;
 import android.support.v4.app.DialogFragment;
@@ -23,9 +25,16 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
+import com.parse.SendCallback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 import java.sql.Time;
@@ -89,7 +98,7 @@ public class WalkerSearchActivity extends BaseActivity {
             }
         });
 
-        //handle search walker button
+        //handle search walker button TODO add location to the search
         searchWalker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -105,12 +114,12 @@ public class WalkerSearchActivity extends BaseActivity {
                     public void done(List<ParseObject> usersAvailability, ParseException e) {
                         if (e == null) {
                             ArrayList<ParseUserInfo> users = new ArrayList<>();
-                            for(final ParseObject userAvailability: usersAvailability){
+                            for (final ParseObject userAvailability : usersAvailability) {
                                 ParseUser user = userAvailability.getParseUser("user");
                                 users.add(new ParseUserInfo(user));
                             }
                             Intent usersSelectionIntent = new Intent(WalkerSearchActivity.this, UserSelctionActivity.class);
-                            usersSelectionIntent.putExtra("users",users);
+                            usersSelectionIntent.putExtra("users", users);
                             startActivityForResult(usersSelectionIntent, REQUEST_USER);
                         } else {
                             Log.d("users", "Error: " + e.getMessage());
@@ -126,9 +135,46 @@ public class WalkerSearchActivity extends BaseActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch(requestCode){
             case REQUEST_ADDRESS:
+                // check that user choose option
                 if(resultCode==RESULT_OK){
                     Address address = data.getParcelableExtra("address");
                     locationButton.setText(address.getAddressLine(0));
+                }
+                break;
+            case REQUEST_USER:
+                if(resultCode==RESULT_OK){
+                    ParseUserInfo user = (ParseUserInfo) data.getSerializableExtra("user");
+                    ParseUser puser = new ParseUser();
+                    puser.setObjectId(user.getObjectId());
+
+                    ParseQuery<ParseInstallation> userInstallationQuery = new ParseQuery<>(ParseInstallation.class);
+                    userInstallationQuery.whereEqualTo("user", puser);
+
+                    ParsePush push = new ParsePush();
+                    push.setQuery(userInstallationQuery);
+
+                    JSONObject pushData = new JSONObject();
+                    try {
+                        pushData.put("action","com.dogwalker.itaynaama.dogwalker.WALKING_REQUEST");
+                        pushData.put("reqUser",ParseUser.getCurrentUser().getObjectId());
+                    } catch (JSONException e) {}
+                    push.setData(pushData);
+                    push.sendInBackground(new SendCallback() {
+                        @Override
+                        public void done(ParseException e) {
+                            if(e==null){
+                                // create message box
+                                AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(WalkerSearchActivity.this);
+                                dlgAlert.setTitle("Request Sent");
+                                dlgAlert.setMessage("A request has been sent to the selected Walker");
+                                dlgAlert.setCancelable(true);
+                                dlgAlert.create().show();
+                            }else{
+                                //TODO
+                                Log.e("Push",e.getMessage());
+                            }
+                        }
+                    });
                 }
                 break;
         }
@@ -214,12 +260,14 @@ public class WalkerSearchActivity extends BaseActivity {
     static public class ParseUserInfo implements Serializable{
         private String username;
         private String address;
+        private String objectId;
 
         public ParseUserInfo(){}
 
         public ParseUserInfo(ParseUser user){
             username = user.getUsername();
             address = user.getString("address");
+            objectId = user.getObjectId();
         }
 
         public String getAddress() {
@@ -230,5 +278,8 @@ public class WalkerSearchActivity extends BaseActivity {
             return username;
         }
 
+        public String getObjectId() {
+            return objectId;
+        }
     }
 }

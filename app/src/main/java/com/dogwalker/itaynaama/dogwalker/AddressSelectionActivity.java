@@ -67,6 +67,7 @@ public class AddressSelectionActivity extends AppCompatActivity implements Adapt
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Address address = adapter.getAddress(position);
         Intent i = new Intent();
+        // set the address as the result
         i.putExtra("address", address);
         setResult(RESULT_OK, i);
         finish();

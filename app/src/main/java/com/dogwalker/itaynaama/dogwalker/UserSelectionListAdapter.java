@@ -31,7 +31,6 @@ public class UserSelectionListAdapter extends ArrayAdapter<WalkerSearchActivity.
 
         username.setText(user.getUsername());
         address.setText(user.getAddress());
-
         return row;
     }
 }

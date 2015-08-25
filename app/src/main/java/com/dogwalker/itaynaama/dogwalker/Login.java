@@ -12,7 +12,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 import com.parse.LogInCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 import com.parse.RequestPasswordResetCallback;
 
@@ -60,6 +62,12 @@ public class Login extends AppCompatActivity implements View.OnClickListener
                         {
                             saveLoginPref();
                             Toast.makeText(getApplicationContext(), "user logged in successfully", Toast.LENGTH_LONG).show();
+
+                            // connect between installation app to login user
+                            ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+                            installation.put("user",ParseUser.getCurrentUser());
+                            installation.saveEventually();
+
                             Intent i = new Intent(Login.this, MainActivity.class);
                             startActivity(i);
                             finish();

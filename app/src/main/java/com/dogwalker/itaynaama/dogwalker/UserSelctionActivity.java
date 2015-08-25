@@ -1,14 +1,19 @@
 package com.dogwalker.itaynaama.dogwalker;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+
+import com.parse.ParseQuery;
 
 import java.util.ArrayList;
 
-public class UserSelctionActivity extends AppCompatActivity {
+public class UserSelctionActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,6 +23,7 @@ public class UserSelctionActivity extends AppCompatActivity {
         ListView usersList = (ListView)findViewById(R.id.user_selection_list);
         ArrayList<WalkerSearchActivity.ParseUserInfo> users = (ArrayList)getIntent().getSerializableExtra("users");
         usersList.setAdapter(new UserSelectionListAdapter(this,users));
+        usersList.setOnItemClickListener(this);
     }
 
     @Override
@@ -40,5 +46,15 @@ public class UserSelctionActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+       WalkerSearchActivity.ParseUserInfo user = (WalkerSearchActivity.ParseUserInfo) parent.getAdapter().getItem(position);
+        Intent i = new Intent();
+        // set the user as the result
+        i.putExtra("user", user);
+        setResult(RESULT_OK, i);
+        finish();
     }
 }
