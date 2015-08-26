@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -11,12 +13,16 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseUser;
 
 
 public class MainActivity extends BaseActivity implements View.OnClickListener
 {
     Button theSearchButton;
+    ImageView profilePicFromParse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -26,6 +32,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
 
         //hide the actionBar's back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        //imageView
+        profilePicFromParse = (ImageView)findViewById(R.id.profilePic);
         //button setup
         theSearchButton = (Button) findViewById(R.id.searchButton);
         theSearchButton.setOnClickListener(this);
@@ -105,6 +113,18 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
             setTitle(currentUser.getUsername());//set the title in the action bar to be the username.
             Log.d("My Loggggg", "user exists and logged in");
             Log.d("My Loggggg", "the username that logged in is - " + currentUser.getUsername());
+
+            //show profile picture in the imageView
+            ParseFile p = (ParseFile) currentUser.get("Photo");
+            try
+            {
+                Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
+                profilePicFromParse.setImageBitmap(b);
+            }
+            catch (ParseException e)
+            {
+                Log.d("My Loggggg", e.getMessage().toString());
+            }
         }
     }
 
