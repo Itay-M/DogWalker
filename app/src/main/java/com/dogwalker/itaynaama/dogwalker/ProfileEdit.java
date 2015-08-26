@@ -32,7 +32,7 @@ import java.io.ByteArrayOutputStream;
 
 public class ProfileEdit extends AppCompatActivity implements View.OnClickListener {
     private static final int CAMERA_REQUEST = 0;
-    EditText nameEdit,cityEdit;
+    EditText nameEdit,cityEdit,phoneEdit;
     Button resetPassword, saveChangesB, changePicB;
     ImageView curruserPic;
     ParseUser currentUser = ParseUser.getCurrentUser();
@@ -63,9 +63,11 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
 
         nameEdit = (EditText) findViewById(R.id.profile_name_edit);
         cityEdit = (EditText) findViewById(R.id.profile_user_city_edit);
+        phoneEdit = (EditText)findViewById(R.id.profile_user_phone_edit);
 
         nameEdit.setHint(currentUser.get("Name").toString());
         cityEdit.setHint(currentUser.get("City").toString());
+        phoneEdit.setHint(currentUser.get("Phone").toString());
 
         resetPassword = (Button) findViewById(R.id.reset_password_button);
         saveChangesB = (Button) findViewById(R.id.save_changes_button);
@@ -134,6 +136,12 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
                 {
                     Log.d("My Loggggg", "city changed");
                     currentUser.put("City", cityEdit.getText().toString());
+                }
+
+                if (!(phoneEdit.getText().toString().equals(currentUser.get("Phone").toString())))
+                {
+                    Log.d("My Loggggg", "phone changed");
+                    currentUser.put("Phone", phoneEdit.getText().toString());
                 }
 
                 //if the new user took a profile picture - save it to parse data base

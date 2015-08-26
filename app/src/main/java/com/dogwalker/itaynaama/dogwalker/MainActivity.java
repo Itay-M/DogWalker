@@ -105,6 +105,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
 
     private void currentUserHandle()
     {
+        Log.d("My Loggggg","currentUserHandle");
         SharedPreferences anyUserExists = PreferenceManager.getDefaultSharedPreferences(this);
         boolean currentUserExists = anyUserExists.getBoolean("USEREXISTS", false);
 
@@ -117,14 +118,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         else
         {
             ParseUser currentUser = ParseUser.getCurrentUser();
-            setTitle(currentUser.getUsername());//set the title in the action bar to be the username.
+//            setTitle(currentUser.getUsername());//set the title in the action bar to be the username.
             Log.d("My Loggggg", "user exists and logged in");
             Log.d("My Loggggg", "the username that logged in is - " + currentUser.getUsername());
 
             //show profile picture in the imageView
-            ParseFile p = (ParseFile) currentUser.get("Photo");
+
             try
             {
+                Log.d("My Loggggg", "in");
+                ParseFile p = (ParseFile) currentUser.get("Photo");
                 Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
                 profilePicFromParse.setImageBitmap(b);
             }

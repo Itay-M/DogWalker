@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -42,6 +43,19 @@ public class Login extends AppCompatActivity implements View.OnClickListener
 
         loginB.setOnClickListener(this);
         forgotPassB.setOnClickListener(this);
+
+        //set the "GO" button in the keyboard to alternatively press the register button
+        passwordET.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
+                    loginB.performClick();
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
     }
 
     @Override

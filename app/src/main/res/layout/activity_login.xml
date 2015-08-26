@@ -27,11 +27,15 @@
 
     <EditText
         android:id="@+id/usernameEditText"
+        android:imeOptions="actionNext"
+        android:singleLine="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <TextView
         android:text="Password"
+        android:imeOptions="actionGo"
+        android:singleLine="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"

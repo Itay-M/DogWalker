@@ -17,7 +17,7 @@ import com.parse.ParseUser;
 public class ProfileView extends BaseActivity implements View.OnClickListener
 {
     ImageView viewPic;
-    TextView name,userName,userCity;
+    TextView name, userName, userCity, userPhone;
     Button editButton;
 
     @Override
@@ -31,6 +31,7 @@ public class ProfileView extends BaseActivity implements View.OnClickListener
         name = (TextView) findViewById(R.id.profile_name);
         userName = (TextView) findViewById(R.id.profile_user_name);
         userCity = (TextView) findViewById(R.id.profile_user_city);
+        userPhone = (TextView)findViewById(R.id.profile_user_phone);
 
         editButton.setOnClickListener(this);
 
@@ -47,6 +48,7 @@ public class ProfileView extends BaseActivity implements View.OnClickListener
         name.setText("Name: " + currentUser.get("Name").toString());
         userName.setText("UserName: " + currentUser.getUsername().toString());
         userCity.setText("City: " + currentUser.get("City").toString());
+        userPhone.setText("Phone: " + currentUser.get("Phone").toString());
 
         ParseFile p = (ParseFile) currentUser.get("Photo");
         try
