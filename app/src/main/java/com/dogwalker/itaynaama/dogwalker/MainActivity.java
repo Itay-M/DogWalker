@@ -109,7 +109,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         SharedPreferences anyUserExists = PreferenceManager.getDefaultSharedPreferences(this);
         boolean currentUserExists = anyUserExists.getBoolean("USEREXISTS", false);
 
-        if (!currentUserExists)
+        if (!currentUserExists || (ParseUser.getCurrentUser() == null))
         {
             Log.d("My Loggggg", "there is no current user, referring to login or register activity...");
             Intent i = new Intent(this, OpeningActivity.class);
