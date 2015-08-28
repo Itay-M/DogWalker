@@ -16,7 +16,7 @@
         android:hint="@string/address_textfield_hint"
         android:drawableStart="@android:drawable/ic_menu_search"
         android:drawableLeft="@android:drawable/ic_menu_search"
-        android:completionThreshold="4"
+        android:completionThreshold="2"
         android:singleLine="true"
         android:dropDownHeight="0dp"
         android:dropDownWidth="match_parent" />

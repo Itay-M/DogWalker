@@ -21,7 +21,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="Address"
-            android:id="@+id/result_row_address"
+            android:id="@+id/result_row_distance"
             android:textSize="18dp"
             android:layout_marginLeft="5dp" />
 

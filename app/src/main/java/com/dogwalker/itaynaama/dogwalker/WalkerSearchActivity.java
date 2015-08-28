@@ -8,6 +8,7 @@ import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Address;
+import android.location.Location;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParsePush;
@@ -50,6 +52,7 @@ public class WalkerSearchActivity extends BaseActivity {
     private static final int REQUEST_USER = 2;
 
     private static final java.text.DateFormat DISPLAY_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
+    private static final java.text.DateFormat DISPLAY_TIME_FORMAT = new SimpleDateFormat("HH:mm");
 
     protected Button locationButton;
     protected Button searchWalker;
@@ -57,6 +60,7 @@ public class WalkerSearchActivity extends BaseActivity {
     protected TextView timeText;
     protected Date date;
     protected Time time;
+    protected Address address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,6 +98,8 @@ public class WalkerSearchActivity extends BaseActivity {
         timeText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //PushReceiver.createPush(WalkerSearchActivity.this, ParseUser.getCurrentUser(),"01/01/01",
+                //      "10:30","Jerusalem");
                 timePickerFragment.show(getSupportFragmentManager(), "timePicker");
             }
         });
@@ -102,11 +108,19 @@ public class WalkerSearchActivity extends BaseActivity {
         searchWalker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ParseQuery availabilityQuery = new ParseQuery("UserAvailability");
+                ParseGeoPoint addressGeoPoint = new ParseGeoPoint();
+                addressGeoPoint.setLatitude(address.getLatitude());
+                addressGeoPoint.setLongitude(address.getLongitude());
+
+                ParseQuery<ParseUser> usersQuery = new ParseQuery<ParseUser>(ParseUser.class);
+                usersQuery.whereWithinKilometers("addressLocation", addressGeoPoint, 20);
+
+                ParseQuery<ParseObject> availabilityQuery = new ParseQuery("UserAvailability");
                 availabilityQuery.whereEqualTo("dayOfWeek", datePickerFragment.getDate().get(Calendar.DAY_OF_WEEK));
                 availabilityQuery.whereLessThanOrEqualTo("startTime", timePickerFragment.getTime());
                 availabilityQuery.whereGreaterThanOrEqualTo("endTime", timePickerFragment.getTime());
                 availabilityQuery.selectKeys(Arrays.asList("user"));
+                availabilityQuery.whereMatchesKeyInQuery("user","objectId",usersQuery);
                 availabilityQuery.include("user");
 
                 // retrieval all users from DB
@@ -120,6 +134,11 @@ public class WalkerSearchActivity extends BaseActivity {
                             }
                             Intent usersSelectionIntent = new Intent(WalkerSearchActivity.this, UserSelctionActivity.class);
                             usersSelectionIntent.putExtra("users", users);
+
+                            // send details of pickup address
+                            usersSelectionIntent.putExtra("addressLocationLng",address.getLongitude());
+                            usersSelectionIntent.putExtra("addressLocationLat", address.getLatitude());
+
                             startActivityForResult(usersSelectionIntent, REQUEST_USER);
                         } else {
                             Log.d("users", "Error: " + e.getMessage());
@@ -139,38 +158,43 @@ public class WalkerSearchActivity extends BaseActivity {
                 if(resultCode==RESULT_OK){
                     Address address = data.getParcelableExtra("address");
                     locationButton.setText(address.getAddressLine(0));
+                    this.address = address;
                 }
                 break;
             case REQUEST_USER:
                 if(resultCode==RESULT_OK){
+                    // push the objectId of selected walker
                     ParseUserInfo user = (ParseUserInfo) data.getSerializableExtra("user");
                     ParseUser puser = new ParseUser();
                     puser.setObjectId(user.getObjectId());
 
+                    // take all installation app of selected walker
                     ParseQuery<ParseInstallation> userInstallationQuery = new ParseQuery<>(ParseInstallation.class);
                     userInstallationQuery.whereEqualTo("user", puser);
 
+                    // create push details
                     ParsePush push = new ParsePush();
                     push.setQuery(userInstallationQuery);
 
                     JSONObject pushData = new JSONObject();
                     try {
                         pushData.put("action","com.dogwalker.itaynaama.dogwalker.WALKING_REQUEST");
+                        // save the requested user details to show them to selected walker
                         pushData.put("reqUser",ParseUser.getCurrentUser().getObjectId());
+                        pushData.put("pickupDate",DISPLAY_DATE_FORMAT.format(date.getTime()));
+                        pushData.put("pickupTime",DISPLAY_TIME_FORMAT.format(time.getTime()));
+                        pushData.put("pickupAddress", address);
                     } catch (JSONException e) {}
                     push.setData(pushData);
+                    // send push
                     push.sendInBackground(new SendCallback() {
                         @Override
                         public void done(ParseException e) {
                             if(e==null){
-                                // create message box
-                                AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(WalkerSearchActivity.this);
-                                dlgAlert.setTitle("Request Sent");
-                                dlgAlert.setMessage("A request has been sent to the selected Walker");
-                                dlgAlert.setCancelable(true);
-                                dlgAlert.create().show();
+                                showMessageBox("Request Sent","A request has been sent to the selected Walker");
                             }else{
                                 //TODO
+                                showMessageBox("Send Request Failed","The message not send, try later");
                                 Log.e("Push",e.getMessage());
                             }
                         }
@@ -178,6 +202,15 @@ public class WalkerSearchActivity extends BaseActivity {
                 }
                 break;
         }
+    }
+
+    // create message box
+    public void showMessageBox(String title, String msg){
+        AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(WalkerSearchActivity.this);
+        dlgAlert.setTitle(title);
+        dlgAlert.setMessage(msg);
+        dlgAlert.setCancelable(true);
+        dlgAlert.create().show();
     }
 
     // window to choose date TODO
@@ -219,7 +252,6 @@ public class WalkerSearchActivity extends BaseActivity {
     public static class TimePickerFragment extends DialogFragment
             implements TimePickerDialog.OnTimeSetListener {
 
-        private static java.text.DateFormat DISPLAY_TIME_FORMAT = new SimpleDateFormat("HH:mm");
         private TextView timeText;
         private Calendar time;
 
@@ -257,10 +289,15 @@ public class WalkerSearchActivity extends BaseActivity {
         }
     }
 
+    /*
+        this class create to pass ParseUser to intent (the object must to be serializable)
+     */
     static public class ParseUserInfo implements Serializable{
         private String username;
         private String address;
         private String objectId;
+        private double addressLocationLat;
+        private double addressLocationLng;
 
         public ParseUserInfo(){}
 
@@ -268,6 +305,13 @@ public class WalkerSearchActivity extends BaseActivity {
             username = user.getUsername();
             address = user.getString("address");
             objectId = user.getObjectId();
+            ParseGeoPoint addressLocation = user.getParseGeoPoint("addressLocation");
+            addressLocationLat = addressLocation.getLatitude();
+            addressLocationLng = addressLocation.getLongitude();
+        }
+
+        public ParseGeoPoint getAddressLocation() {
+            return new ParseGeoPoint(addressLocationLat,addressLocationLng);
         }
 
         public String getAddress() {

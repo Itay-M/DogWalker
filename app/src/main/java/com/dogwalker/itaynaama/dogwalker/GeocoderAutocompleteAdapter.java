@@ -19,6 +19,14 @@ import java.util.Locale;
  */
 public class GeocoderAutocompleteAdapter extends ArrayAdapter<GeocoderAutocompleteAdapter.AddressAutocompleteResult> implements Filterable {
 
+    /**
+     * Address autocomplete suggestions limit bounds
+     */
+    static private final double[] BOUNDS_TR = {33.417551, 35.927429};
+    static private final double[] BOUNDS_BL = {29.527829, 34.021740};
+
+    static private final int AUTOCOMPLETE_MAX_RESULTS = 20;
+
     private final Geocoder geocoder;
     private Filter filter;
     private List<AddressAutocompleteResult> lastAddresses;
@@ -56,7 +64,8 @@ public class GeocoderAutocompleteAdapter extends ArrayAdapter<GeocoderAutocomple
                     if (constraint != null && constraint.length() > 0) {
                         try {
                             // TODO: limit bounds to Israel only
-                            lastAddresses = AddressAutocompleteResult.wrap(geocoder.getFromLocationName(constraint.toString(), 10));
+                            lastAddresses = AddressAutocompleteResult.wrap(
+                                    geocoder.getFromLocationName(constraint.toString(), AUTOCOMPLETE_MAX_RESULTS, BOUNDS_BL[0],BOUNDS_BL[1],BOUNDS_TR[0],BOUNDS_TR[1]));
                             results.values = lastAddresses;
                             results.count = lastAddresses.size();
 
@@ -111,7 +120,9 @@ public class GeocoderAutocompleteAdapter extends ArrayAdapter<GeocoderAutocomple
         public static List<AddressAutocompleteResult> wrap(List<Address> addresses){
             ArrayList<AddressAutocompleteResult> result = new ArrayList<>(addresses.size());
             for(Address address : addresses) {
-                result.add(new AddressAutocompleteResult(address));
+                if(address.getCountryCode()==null || "IL".equalsIgnoreCase(address.getCountryCode())) {
+                    result.add(new AddressAutocompleteResult(address));
+                }
             }
             return result;
         }
