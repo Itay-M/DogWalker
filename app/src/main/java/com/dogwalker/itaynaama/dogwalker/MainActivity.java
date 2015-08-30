@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -13,12 +15,16 @@ import android.view.View;
 import android.widget.Button;
 
 import com.parse.ParseInstallation;
+import android.widget.ImageView;
+import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseUser;
 
 
 public class MainActivity extends BaseActivity implements View.OnClickListener
 {
     Button theSearchButton;
+    ImageView profilePicFromParse;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -28,10 +34,19 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
 
         //hide the actionBar's back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        //imageView
+        profilePicFromParse = (ImageView)findViewById(R.id.profilePic);
         //button setup
         theSearchButton = (Button) findViewById(R.id.searchButton);
         theSearchButton.setOnClickListener(this);
         //check if there is a current user logged in
+        currentUserHandle();
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
         currentUserHandle();
     }
 
@@ -92,10 +107,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
 
     private void currentUserHandle()
     {
+        Log.d("My Loggggg","currentUserHandle");
         SharedPreferences anyUserExists = PreferenceManager.getDefaultSharedPreferences(this);
         boolean currentUserExists = anyUserExists.getBoolean("USEREXISTS", false);
 
-        if (!currentUserExists)
+        if (!currentUserExists || (ParseUser.getCurrentUser() == null))
         {
             Log.d("My Loggggg", "there is no current user, referring to login or register activity...");
             Intent i = new Intent(this, OpeningActivity.class);
@@ -109,9 +125,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
             installation.saveEventually();
 
             ParseUser currentUser = ParseUser.getCurrentUser();
-            setTitle(currentUser.getUsername());//set the title in the action bar to be the username.
+//            setTitle(currentUser.getUsername());//set the title in the action bar to be the username.
             Log.d("My Loggggg", "user exists and logged in");
             Log.d("My Loggggg", "the username that logged in is - " + currentUser.getUsername());
+
+            //show profile picture in the imageView
+
+            try
+            {
+                Log.d("My Loggggg", "in");
+                ParseFile p = (ParseFile) currentUser.get("Photo");
+                Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
+                profilePicFromParse.setImageBitmap(b);
+            }
+            catch (ParseException e)
+            {
+                Log.d("My Loggggg", e.getMessage().toString());
+            }
         }
     }
 

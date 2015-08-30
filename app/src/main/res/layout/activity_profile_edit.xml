@@ -10,8 +10,21 @@
               tools:context="com.dogwalker.itaynaama.dogwalker.ProfileEdit"
     android:background="#ffffff">
 
+    <ImageView
+        android:id="@+id/view_curr_pic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/change_pic_button"
+        android:text="change profile picture"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
     <EditText
         android:id="@+id/profile_name_edit"
+        android:imeOptions="actionNext"
+        android:singleLine="true"
         android:textColor="@android:color/holo_green_light"
         android:textSize="30dp"
         android:textStyle="italic"
@@ -20,6 +33,14 @@
 
     <EditText
         android:id="@+id/profile_user_city_edit"
+        android:textColor="@android:color/holo_green_light"
+        android:textSize="30dp"
+        android:textStyle="italic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <EditText
+        android:id="@+id/profile_user_phone_edit"
         android:textColor="@android:color/holo_green_light"
         android:textSize="30dp"
         android:textStyle="italic"

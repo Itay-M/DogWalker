@@ -3,22 +3,25 @@
       xmlns:tools="http://schemas.android.com/tools"
       tools:context="com.dogwalker.itaynaama.dogwalker.BaseActivity">
     <item android:id="@+id/action_settings"
-    android:title="@string/action_settings"
-    android:orderInCategory="100"
-    app:showAsAction="never"/>
+          android:title="@string/action_settings"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
 
     <item android:id="@+id/logout_action"
-        android:title="@string/action_logout"
-        android:orderInCategory="90"
-        app:showAsAction="never" />
+          android:title="@string/action_logout"
+          android:orderInCategory="90"
+          app:showAsAction="never" />
 
     <item android:id="@+id/view_profile_action"
-        android:title="@string/action_edit_profile"
-        android:orderInCategory="90"
-        app:showAsAction="never" />
+            android:title="@string/action_edit_profile"
+            android:orderInCategory="90"
+            app:showAsAction="never" />
 
-    <item android:id="@+id/action_search"
-        android:title="@string/abc_search_hint"
-        android:icon="@drawable/abc_ic_search_api_mtrl_alpha"
-        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/userIN"
+        android:title=""
+        android:icon="@drawable/logo"
+        android:orderInCategory="79"
+        app:showAsAction="always"/>
 </menu>
