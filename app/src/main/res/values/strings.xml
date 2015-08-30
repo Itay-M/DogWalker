@@ -26,5 +26,10 @@
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_user_selction">Select User</string>
     <string name="title_activity_profile_edit">ProfileEdit</string>
+    <string name="title_activity_walker_request">Request Details</string>
 
+    <string name="walking_request_intent_action">com.dogwalker.itaynaama.dogwalker.WALKING_REQUEST</string>
+    <string name="walker_request_date">date</string>
+    <string name="walker_request_name">Name</string>
+    <string name="walker_requset_time">time</string>
 </resources>

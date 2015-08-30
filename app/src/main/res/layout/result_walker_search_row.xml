@@ -2,7 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:descendantFocusability="blocksDescendants">
+    android:descendantFocusability="blocksDescendants"
+    android:background="#ffffff">
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="wrap_content"
@@ -20,10 +21,11 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Address"
+            android:text="distance"
             android:id="@+id/result_row_distance"
             android:textSize="18dp"
-            android:layout_marginLeft="5dp" />
+            android:layout_marginLeft="5dp"
+            android:singleLine="false" />
 
         <RatingBar
             android:layout_width="wrap_content"

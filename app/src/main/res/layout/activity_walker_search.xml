@@ -7,7 +7,8 @@
     android:orientation="vertical"
     tools:context="com.dogwalker.itaynaama.dogwalker.WalkerSearchActivity"
     android:background="@android:color/white"
-    android:id="@+id/walker_search_main_layout">
+    android:id="@+id/walker_search_main_layout"
+    android:touchscreenBlocksFocus="false">
 
     <TextView
         android:layout_width="match_parent"
@@ -16,7 +17,8 @@
         android:text="@string/walker_search_location_label"
         android:id="@+id/textView"
         android:textAlignment="textStart"
-        android:gravity="start" />
+        android:gravity="start"
+        android:layout_marginTop="20dp" />
 
     <Button
         android:layout_width="match_parent"
@@ -24,7 +26,9 @@
         android:id="@+id/walker_search_location_btn"
         android:layout_gravity="center_horizontal"
         android:hint="@string/walker_search_loc_btn_hint"
-        android:background="#ffffff" />
+        android:background="#ffffff"
+        android:textColor="@color/base_app_color"
+        android:layout_marginTop="10dp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -32,7 +36,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="@string/walker_search_time_label"
         android:id="@+id/textView2"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="30dp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -41,7 +45,7 @@
         android:text="14/08/2015"
         android:id="@+id/walker_search_date"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="40dp"
         android:textSize="20pt"
         android:gravity="center"
         android:textColor="#79103fff" />
@@ -55,13 +59,17 @@
         android:textSize="20pt"
         android:text="19:30"
         android:layout_marginTop="20dp"
-        android:textColor="#79103fff" />
+        android:textColor="#79103fff"
+        android:layout_marginBottom="80dp" />
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="New Button"
         android:id="@+id/walker_search_search_btn"
-        android:layout_gravity="center_horizontal" />
+        android:layout_gravity="center_horizontal"
+        android:shadowColor="@color/base_app_color"
+        android:singleLine="false"
+        android:textColor="@color/base_app_color"
+        android:hint="Search" />
 
 </LinearLayout>

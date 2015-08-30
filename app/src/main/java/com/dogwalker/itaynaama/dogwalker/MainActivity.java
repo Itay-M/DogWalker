@@ -11,6 +11,8 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 
 
@@ -69,7 +71,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
                 }
                 else
                 {
-                    Intent i = new Intent(this, SearchActivity.class);
+                    Intent i = new Intent(this, WalkerSearchActivity.class);
                     startActivity(i);
                 }
         }
@@ -101,6 +103,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         }
         else
         {
+            // connect between installation app to login user
+            ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+            installation.put("user",ParseUser.getCurrentUser());
+            installation.saveEventually();
+
             ParseUser currentUser = ParseUser.getCurrentUser();
             setTitle(currentUser.getUsername());//set the title in the action bar to be the username.
             Log.d("My Loggggg", "user exists and logged in");
