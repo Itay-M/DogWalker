@@ -15,13 +15,19 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlacePicker;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 
 public class AddressSelectionActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+    static private final int LOCATION_REQUEST = 1000;
+
     protected AutoCompleteTextView addressText;
     protected ListView addressesListView;
     protected GeocoderAutocompleteAdapter adapter;
@@ -39,6 +45,9 @@ public class AddressSelectionActivity extends AppCompatActivity implements Adapt
 
         addressesListView.setAdapter(adapter);
         addressesListView.setOnItemClickListener(this);
+
+        // initiate search by current location
+        adapter.getFilter().filter(null);
     }
 
     @Override

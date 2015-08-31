@@ -1,14 +1,20 @@
 package com.dogwalker.itaynaama.dogwalker;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
+import android.media.Image;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseUser;
 
 import java.util.ArrayList;
@@ -28,6 +34,7 @@ public class WalkerRequestActivity extends AppCompatActivity {
         TextView timeText = (TextView)findViewById(R.id.walker_requset_time);
         TextView phoneText = (TextView)findViewById(R.id.walker_request_phone);
         TextView addressText = (TextView)findViewById(R.id.walker_request_address);
+        ImageView profileImage = (ImageView)findViewById(R.id.walker_request_image);
 
         Intent intent = getIntent();
         if(intent.getAction().equals(getString(R.string.walking_request_intent_action))){
@@ -40,15 +47,33 @@ public class WalkerRequestActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
+            ParseFile userImage = userRequested.getParseFile("Photo");
+            if(userImage!=null) {
+                try {
+                    Bitmap b = BitmapFactory.decodeByteArray(userImage.getData(), 0, userImage.getData().length);
+                    profileImage.setImageBitmap(b);
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
+            }
+
+
             nameText.setText((String) userRequested.get("Name"));
+            nameText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent viewProfile = new Intent(WalkerRequestActivity.this,ProfileView.class);
+                    startActivity(viewProfile);
+                }
+            });
+
             phoneText.setText((String)userRequested.get("Phone"));
 
-            long puDate = intent.getLongExtra("date", 0);
+
+            Date date = (Date)intent.getSerializableExtra("date");
+            dateText.setText(WalkerSearchActivity.DISPLAY_DATE_FORMAT.format(date));
+
             int puTime = intent.getIntExtra("time", 0);
-
-            Date date = new Date(puDate);
-            dateText.setText(WalkerSearchActivity.DISPLAY_DATE_FORMAT.format(date.getTime()));
-
             Calendar time = Calendar.getInstance();
             time.set(Calendar.HOUR_OF_DAY,puTime/60);
             time.set(Calendar.MINUTE,puTime%60);

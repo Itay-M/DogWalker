@@ -23,14 +23,14 @@
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="0dp"
         android:id="@+id/lstAddresses"
         android:layout_gravity="center_horizontal"
         android:choiceMode="singleChoice"
         android:footerDividersEnabled="false"
         android:dividerHeight="1dp"
         android:divider="#371958ff"
-        android:paddingStart="0dp"
-        android:headerDividersEnabled="false" />
+        android:headerDividersEnabled="false"
+        android:layout_weight="1" />
 
 </LinearLayout>

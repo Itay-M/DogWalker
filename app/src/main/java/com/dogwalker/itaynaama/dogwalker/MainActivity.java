@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.location.LocationManager;
+import android.media.MediaActionSound;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
@@ -14,17 +15,27 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import com.parse.FindCallback;
 import com.parse.ParseInstallation;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
+
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
+
+import java.util.List;
 
 
 public class MainActivity extends BaseActivity implements View.OnClickListener
 {
-    Button theSearchButton;
-    ImageView profilePicFromParse;
+    protected Button theSearchButton;
+    protected ImageView profilePicFromParse;
+    protected ListView walkerRequestsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -32,15 +43,42 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //hide the actionBar's back button
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         //imageView
         profilePicFromParse = (ImageView)findViewById(R.id.profilePic);
         //button setup
         theSearchButton = (Button) findViewById(R.id.searchButton);
+        // walker requests list
+        walkerRequestsList = (ListView)findViewById(R.id.main_walker_requests_list);
+
+        //hide the actionBar's back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
         theSearchButton.setOnClickListener(this);
+
         //check if there is a current user logged in
         currentUserHandle();
+
+        // initialize requests list view
+        TextView walkerRequestsListHeader = new TextView(this);
+        walkerRequestsListHeader.setText("Walking Requests");
+        walkerRequestsList.addHeaderView(walkerRequestsListHeader);
+
+        // retrieve walker requests and fill the list
+        retrieveWalkerRequests();
+    }
+
+    protected void retrieveWalkerRequests(){
+        ParseQuery<ParseObject> requestsQuery = new ParseQuery<>("Requests");
+        requestsQuery.whereEqualTo("to",ParseUser.getCurrentUser());
+        requestsQuery.include("from");
+        requestsQuery.addDescendingOrder("datePickup");
+        requestsQuery.addDescendingOrder("timePickup");
+        requestsQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> requests, ParseException e) {
+                ListAdapter adapter = new WalkerRequestsListAdapter(MainActivity.this,requests);
+                walkerRequestsList.setAdapter(adapter);
+            }
+        });
     }
 
     @Override
@@ -134,14 +172,17 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
             try
             {
                 Log.d("My Loggggg", "in");
-                ParseFile p = (ParseFile) currentUser.get("Photo");
-                Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
-                profilePicFromParse.setImageBitmap(b);
+                ParseFile p = currentUser.getParseFile("Photo");
+                if(p != null) {
+                    Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
+                    profilePicFromParse.setImageBitmap(b);
+                }
             }
             catch (ParseException e)
             {
                 Log.d("My Loggggg", e.getMessage().toString());
-            }
+                Log.d("My Loggggg", currentUser.getUsername());
+                            }
         }
     }
 

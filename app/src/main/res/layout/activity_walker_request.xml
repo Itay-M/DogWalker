@@ -20,7 +20,7 @@
         <ImageView
             android:layout_width="100dp"
             android:layout_height="100dp"
-            android:id="@+id/imageView3"
+            android:id="@+id/walker_request_image"
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
@@ -40,7 +40,8 @@
                 android:text="@string/walker_request_name"
                 android:id="@+id/walker_request_name"
                 android:layout_gravity="left"
-                android:textSize="25sp" />
+                android:textSize="25sp"
+                android:clickable="true" />
 
             <TextView
                 android:layout_width="wrap_content"

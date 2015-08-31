@@ -20,15 +20,22 @@
         android:gravity="start"
         android:layout_marginTop="20dp" />
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:id="@+id/walker_search_address"
+        android:layout_marginTop="10dp" />
+
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/walker_search_location_btn"
         android:layout_gravity="center_horizontal"
-        android:hint="@string/walker_search_loc_btn_hint"
         android:background="#ffffff"
         android:textColor="@color/base_app_color"
-        android:layout_marginTop="10dp" />
+        android:layout_marginTop="10dp"
+        android:text="@string/walker_search_loc_btn_hint" />
 
     <TextView
         android:layout_width="match_parent"
@@ -60,13 +67,12 @@
         android:text="19:30"
         android:layout_marginTop="20dp"
         android:textColor="#79103fff"
-        android:layout_marginBottom="80dp" />
+        android:layout_weight="1" />
 
     <Button
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/walker_search_search_btn"
-        android:layout_gravity="center_horizontal"
         android:shadowColor="@color/base_app_color"
         android:singleLine="false"
         android:textColor="@color/base_app_color"

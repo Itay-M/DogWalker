@@ -59,6 +59,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
     protected Button searchWalker;
     protected TextView dateText;
     protected TextView timeText;
+    protected TextView addressText;
     protected Calendar date;
     protected int time;
     protected Address address;
@@ -72,6 +73,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
         dateText = (TextView)findViewById(R.id.walker_search_date);
         timeText = (TextView)findViewById(R.id.walker_search_time);
         searchWalker = (Button)findViewById(R.id.walker_search_search_btn);
+        addressText = (TextView)findViewById(R.id.walker_search_address);
 
         //handle location choosing button
         locationButton.setOnClickListener(new View.OnClickListener() {
@@ -104,7 +106,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
             }
         });
 
-        //handle search walker button TODO add location to the search
+        //handle search walker button
         searchWalker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,6 +117,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                 ParseQuery<ParseUser> usersQuery = new ParseQuery<ParseUser>(ParseUser.class);
                 usersQuery.whereWithinKilometers("addressLocation", addressGeoPoint, 20);
 
+                // found walkers that can according to criterion
                 ParseQuery<ParseObject> availabilityQuery = new ParseQuery("UserAvailability");
                 availabilityQuery.whereEqualTo("dayOfWeek", datePickerFragment.getDate().get(Calendar.DAY_OF_WEEK));
                 availabilityQuery.whereLessThanOrEqualTo("startTime", time);
@@ -157,7 +160,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                 // check that user choose option
                 if(resultCode==RESULT_OK){
                     Address address = data.getParcelableExtra("address");
-                    locationButton.setText(address.getAddressLine(0));
+                    addressText.setText(Utils.addressToString(address));
                     this.address = address;
                 }
                 break;
@@ -165,45 +168,55 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                 if(resultCode==RESULT_OK){
                     // push the objectId of selected walker
                     ParseUserInfo user = (ParseUserInfo) data.getSerializableExtra("user");
-                    ParseUser puser = new ParseUser();
+                    final ParseUser puser = new ParseUser();
                     puser.setObjectId(user.getObjectId());
 
-                    // take all installation app of selected walker
-                    ParseQuery<ParseInstallation> userInstallationQuery = new ParseQuery<>(ParseInstallation.class);
-                    userInstallationQuery.whereEqualTo("user", puser);
-
-                    // create push details
-                    ParsePush push = new ParsePush();
-                    push.setQuery(userInstallationQuery);
-
-                    JSONObject pushData = new JSONObject();
-                    try {
-                        pushData.put("action","com.dogwalker.itaynaama.dogwalker.WALKING_REQUEST");
-                        // save the requested user details to show them to selected walker
-                        pushData.put("reqUser",ParseUser.getCurrentUser().getObjectId());
-                        // save the pickup details
-                        pushData.put("date",date.getTimeInMillis());
-                        pushData.put("time",time);
-                        JSONArray addressLines = new JSONArray();
-                        for (int i=0; i<=address.getMaxAddressLineIndex();i++){
-                            addressLines.put(address.getAddressLine(i));
-                        }
-                        pushData.put("address", addressLines);
-                        pushData.put("addLng",address.getLongitude());
-                        pushData.put("addLat",address.getLatitude());
-
-                    } catch (JSONException e) {}
-                    push.setData(pushData);
-                    // send push
-                    push.sendInBackground(new SendCallback() {
+                    // save request details in db
+                    final ParseObject request = new ParseObject("Requests");
+                    request.put("from", ParseUser.getCurrentUser());
+                    request.put("to", puser);
+                    request.put("datePickup", date.getTime());
+                    request.put("timePickup", time);
+                    JSONArray addressLines = new JSONArray();
+                    for (int i=0; i<=address.getMaxAddressLineIndex();i++){
+                        addressLines.put(address.getAddressLine(i));
+                    }
+                    request.put("address", addressLines);
+                    request.put("addressLocation",new ParseGeoPoint(address.getLatitude(),address.getLongitude()));
+                    request.saveInBackground(new SaveCallback() {
                         @Override
                         public void done(ParseException e) {
                             if(e==null){
-                                showMessageBox("Request Sent","A request has been sent to the selected Walker");
+                                // take all installation app of selected walker
+                                ParseQuery<ParseInstallation> userInstallationQuery = new ParseQuery<>(ParseInstallation.class);
+                                userInstallationQuery.whereEqualTo("user", puser);
+
+                                // create push details
+                                ParsePush push = new ParsePush();
+                                push.setQuery(userInstallationQuery);
+
+                                JSONObject pushData = new JSONObject();
+                                try {
+                                    pushData.put("action","com.dogwalker.itaynaama.dogwalker.WALKING_REQUEST");
+                                    // save request id
+                                    pushData.put("reqId",request.getObjectId());
+                                } catch (JSONException e1) {}
+                                push.setData(pushData);
+                                // send push
+                                push.sendInBackground(new SendCallback() {
+                                    @Override
+                                    public void done(ParseException e) {
+                                        if(e==null){
+                                            showMessageBox("Request Sent","A request has been sent to the selected Walker");
+                                        }else{
+                                            showMessageBox("Send Request Failed","The message not send, try later");
+                                            Log.e("Push",e.getMessage());
+                                        }
+                                    }
+                                });
                             }else{
-                                //TODO
                                 showMessageBox("Send Request Failed","The message not send, try later");
-                                Log.e("Push",e.getMessage());
+                                Log.e("SaveRequest", e.getMessage());
                             }
                         }
                     });

@@ -13,8 +13,10 @@ import android.util.Log;
 
 import com.parse.GetCallback;
 import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParsePushBroadcastReceiver;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import org.json.JSONArray;
@@ -34,25 +36,36 @@ public class PushReceiver extends BroadcastReceiver {
     public void onReceive(final Context context, Intent intent) {
         if(intent.getAction().equals("com.dogwalker.itaynaama.dogwalker.WALKING_REQUEST")) {
             try {
+                // TODO take request objectId from JSONObject and push other data from Requests parse class
                 JSONObject data = new JSONObject(intent.getStringExtra(ParsePushBroadcastReceiver.KEY_PUSH_DATA));
-                ParseUser reqUser = new ParseUser();
 
-                final long pickupDate = data.getLong("date");
-                final int pickupTime = data.getInt("time");
-                final JSONArray pickupAddressLines = data.getJSONArray("address");
-                final ArrayList<String> pickupAddress = new ArrayList<>(pickupAddressLines.length());
-                for(int i=0;i<pickupAddressLines.length();i++){
-                    pickupAddress.add(pickupAddressLines.getString(i));
-                }
-                final double addressLng = data.getDouble("addLng");
-                final double addressLat = data.getDouble("addLat");
+                // take id of request
+                final String reqId = data.getString("reqId");
 
-                reqUser.setObjectId(data.getString("reqUser"));
-                reqUser.fetchInBackground(new GetCallback<ParseUser>() {
+                ParseQuery<ParseObject> requestQuery = new ParseQuery<>("Requests");
+                requestQuery.whereEqualTo("objectId", reqId);
+                requestQuery.include("from");
+                requestQuery.getFirstInBackground(new GetCallback<ParseObject>() {
                     @Override
-                    public void done(ParseUser parseUser, ParseException e) {
-                        if(e==null){
-                            createPush(context,parseUser,pickupDate,pickupTime,pickupAddress,addressLat,addressLng);
+                    public void done(ParseObject request, ParseException e) {
+                        if (e == null && request != null) {
+                            ParseUser reqUser = request.getParseUser("from");
+                            Date pickupDate = request.getDate("datePickup");
+                            int pickupTime = request.getInt("timePickup");
+                            JSONArray pickupAddressLines = request.getJSONArray("address");
+                            ArrayList<String> pickupAddress = new ArrayList<>(pickupAddressLines.length());
+                            for (int i = 0; i < pickupAddressLines.length(); i++) {
+                                try {
+                                    pickupAddress.add(pickupAddressLines.getString(i));
+                                } catch (JSONException e1) {
+                                    Log.d("PushReceiver",e1.getMessage());
+                                }
+                            }
+                            ParseGeoPoint addressLocation = request.getParseGeoPoint("addressLocation");
+
+                            createPush(context, reqUser, pickupDate, pickupTime, pickupAddress, addressLocation.getLatitude(), addressLocation.getLongitude());
+                        } else {
+                            Log.d("PushReceiver", e.getMessage());
                         }
                     }
                 });
@@ -63,7 +76,7 @@ public class PushReceiver extends BroadcastReceiver {
         }
     }
 
-    static public void createPush(Context context,ParseUser user,long date,int time,ArrayList<String> address,double addressLat, double addressLng){
+    static public void createPush(Context context,ParseUser user,Date date,int time,ArrayList<String> address,double addressLat, double addressLng){
         android.support.v4.app.NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.notification_icon)
                         .setContentTitle("DogWalking request")

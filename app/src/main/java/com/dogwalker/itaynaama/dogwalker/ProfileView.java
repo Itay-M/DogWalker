@@ -50,11 +50,13 @@ public class ProfileView extends BaseActivity implements View.OnClickListener
         userCity.setText("City: " + currentUser.get("City").toString());
         userPhone.setText("Phone: " + currentUser.get("Phone").toString());
 
-        ParseFile p = (ParseFile) currentUser.get("Photo");
+        ParseFile p = currentUser.getParseFile("Photo");
         try
         {
-            Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
-            viewPic.setImageBitmap(b);
+            if(p != null) {
+                Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
+                viewPic.setImageBitmap(b);
+            }
         }
         catch (ParseException e)
         {
