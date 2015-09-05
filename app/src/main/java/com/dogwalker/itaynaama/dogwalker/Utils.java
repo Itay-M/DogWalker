@@ -1,6 +1,9 @@
 package com.dogwalker.itaynaama.dogwalker;
 
 import android.location.Address;
+import android.widget.Adapter;
+import android.widget.ListAdapter;
+import android.widget.WrapperListAdapter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -36,7 +39,12 @@ public class Utils {
         return res.toString();
     }
 
+    static public String addressToString(JSONArray addr){
+        return addressToString(addr,",\n");
+    }
     static public String addressToString(JSONArray addr,String sep){
+        if(addr==null) return "";
+
         StringBuilder res = new StringBuilder();
         for(int i=0;i<addr.length();i++){
             try {
@@ -47,5 +55,19 @@ public class Utils {
             }
         }
         return res.toString();
+    }
+
+    static public JSONArray addressToJSONArray(Address address){
+        JSONArray addressLines = new JSONArray();
+        for (int i=0; i<=address.getMaxAddressLineIndex();i++){
+            addressLines.put(address.getAddressLine(i));
+        }
+        return addressLines;
+    }
+
+    static public Adapter getActualListAdapter(ListAdapter adapter){
+        if(adapter instanceof WrapperListAdapter)
+            return getActualListAdapter(((WrapperListAdapter)adapter).getWrappedAdapter());
+        return adapter;
     }
 }

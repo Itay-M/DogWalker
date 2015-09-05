@@ -177,11 +177,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                     request.put("to", puser);
                     request.put("datePickup", date.getTime());
                     request.put("timePickup", time);
-                    JSONArray addressLines = new JSONArray();
-                    for (int i=0; i<=address.getMaxAddressLineIndex();i++){
-                        addressLines.put(address.getAddressLine(i));
-                    }
-                    request.put("address", addressLines);
+                    request.put("address", Utils.addressToJSONArray(address));
                     request.put("addressLocation",new ParseGeoPoint(address.getLatitude(),address.getLongitude()));
                     request.saveInBackground(new SaveCallback() {
                         @Override

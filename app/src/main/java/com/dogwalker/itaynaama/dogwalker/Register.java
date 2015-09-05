@@ -4,9 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,11 +12,10 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
+import android.location.Address;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -30,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 import java.io.ByteArrayOutputStream;
@@ -38,10 +36,12 @@ import java.io.ByteArrayOutputStream;
 public class Register extends AppCompatActivity implements View.OnClickListener
 {
     private static final int CAMERA_REQUEST = 0;
+    private static final int REQUEST_ADDRESS = 1;
     private boolean pictureTaken = false;
-    Button registerB,pictureB;
-    ImageView newProfilePicIV;
-    EditText nameET,usernameET,emailET,cityET,passwordET,phoneET;
+    protected Button registerB,pictureB,addressB;
+    protected ImageView newProfilePicIV;
+    protected EditText nameET,usernameET,emailET,passwordET,phoneET,addressET;
+    protected Address address;
     SharedPreferences userPref;
     ParseFile photoFile;
     byte[] picByteArray;
@@ -54,19 +54,24 @@ public class Register extends AppCompatActivity implements View.OnClickListener
         setContentView(R.layout.activity_register);
 
         newProfilePicIV = (ImageView) findViewById(R.id.newProfilePicView);
+
         //Buttons
         registerB = (Button) findViewById(R.id.registerButton);
         pictureB = (Button) findViewById(R.id.pictureButton);
+
         //editTexts
         nameET = (EditText)findViewById(R.id.regNameEditText);
         usernameET = (EditText)findViewById(R.id.regUsernameEditText);
         emailET = (EditText)findViewById(R.id.regEmailEditText);
-        cityET = (EditText)findViewById(R.id.regCityEditText);
+        addressB = (Button)findViewById(R.id.regAddressButton);
+        addressET = (EditText)findViewById(R.id.regAddressEditText);
         passwordET = (EditText)findViewById(R.id.regPasswordEditText);
         phoneET = (EditText)findViewById(R.id.regPhoneEditText);
+
         //onClick listeners
         registerB.setOnClickListener(this);
         pictureB.setOnClickListener(this);
+        addressB.setOnClickListener(this);
 
         userPref = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -102,13 +107,15 @@ public class Register extends AppCompatActivity implements View.OnClickListener
 
                 //new user creation.
                 ParseUser user = new ParseUser();
+
                 //retrieve data from the EditText objects and place it as the user data.
                 user.setUsername(usernameET.getText().toString());
                 user.setPassword(passwordET.getText().toString());
-                user.setEmail(emailET.getText().toString());
+                user.setEmail(emailET.getText().toString().toLowerCase());
                 user.put("Name", nameET.getText().toString());
-                user.put("City", cityET.getText().toString());
+                user.put("address", Utils.addressToJSONArray(address));
                 user.put("Phone", phoneET.getText().toString());
+                user.put("addressLocation",new ParseGeoPoint(address.getLatitude(),address.getLongitude()));
 
                 //if the new user took a profile picture - save it to parse data base
                 Log.d("My Loggggg", String.valueOf(pictureTaken));
@@ -117,27 +124,6 @@ public class Register extends AppCompatActivity implements View.OnClickListener
                     Toast.makeText(getApplicationContext(), "saving photo", Toast.LENGTH_LONG).show();
                     newProfilePicIV.setImageBitmap(bmPic);
                     photoFile = new ParseFile(usernameET.getText().toString()+"profile_pic.jpg",picByteArray);
-
-                    try
-                    {
-                        photoFile.save();
-                    }
-                    catch (ParseException e)
-                    {
-                        Log.d("My Loggggg", e.getMessage().toString());
-                    }
-                    user.put("Photo", photoFile);
-                    user.saveInBackground();
-                }
-                else
-                {
-                    Log.d("My Loggggg", "no picture");
-                    byte[] picArray;
-                    Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.logo);
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    bm.compress(Bitmap.CompressFormat.JPEG,100,stream);
-                    picArray = stream.toByteArray();
-                    photoFile = new ParseFile(usernameET.getText().toString()+"profile_pic.jpg", picArray );
 
                     try
                     {
@@ -183,6 +169,7 @@ public class Register extends AppCompatActivity implements View.OnClickListener
                         }
                         else
                         {
+                            // TODO how to know what the problem to show to user
                             // Sign up didn't succeed, Look at the ParseException to figure out what went wrong.
                             //in addition prompt alert for the unsuccessful registration.
                             Log.d("My Loggggg", e.getMessage().toString());
@@ -213,6 +200,14 @@ public class Register extends AppCompatActivity implements View.OnClickListener
                 // create Intent to take a picture and return control to the calling application
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(intent, CAMERA_REQUEST);
+
+                break;
+
+            case (R.id.regAddressButton):
+                Intent addressSelectionIntent = new Intent(Register.this, AddressSelectionActivity.class);
+                startActivityForResult(addressSelectionIntent, REQUEST_ADDRESS);
+
+                break;
         }
     }
 
@@ -224,16 +219,27 @@ public class Register extends AppCompatActivity implements View.OnClickListener
         if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST)
         {
             pictureTaken = true;
+
             //get the photo
             bmPic = (Bitmap) data.getExtras().get("data");
+
             //convert and scale the photo
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bmPic.compress(Bitmap.CompressFormat.JPEG,100,stream);
+
             //put the photo in byte array
             picByteArray = stream.toByteArray();
             //present the photo that is going to be save in circle view
             newProfilePicIV.setImageBitmap(getCircleBitmap(bmPic));
+
+        }else if(resultCode == RESULT_OK && requestCode == REQUEST_ADDRESS){
+
+            Address address = data.getParcelableExtra("address");
+            addressET.setText(Utils.addressToString(address));
+            this.address = address;
         }
+
+
     }
 
     /**

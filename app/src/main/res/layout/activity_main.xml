@@ -6,7 +6,6 @@
     android:background="#ffffff"
     android:padding="5dp">
 
-
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -30,13 +29,37 @@
             android:layout_marginLeft="20px" />
     </LinearLayout>
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Walker Requests"
+        android:id="@+id/main_text_walker_request" />
+
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:id="@+id/main_my_request_list"
+        android:layout_gravity="center_horizontal"
+        android:choiceMode="singleChoice"
+        android:layout_marginTop="10dp"
+        android:layout_weight="0.29" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="My Requests"
+        android:id="@+id/main_text_my_request"
+        android:layout_marginTop="20dp" />
+
     <ListView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:id="@+id/main_walker_requests_list"
         android:layout_gravity="center_horizontal"
-        android:layout_weight="1"
-        android:layout_marginTop="10dp" />
-
+        android:layout_weight="0.29"
+        android:layout_marginTop="10dp"
+        android:choiceMode="singleChoice" />
 
 </LinearLayout>

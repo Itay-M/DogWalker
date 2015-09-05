@@ -11,6 +11,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.location.Address;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,11 +21,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.parse.ParseException;
 import com.parse.ParseFile;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseUser;
 import com.parse.RequestPasswordResetCallback;
 
@@ -32,14 +35,16 @@ import java.io.ByteArrayOutputStream;
 
 public class ProfileEdit extends AppCompatActivity implements View.OnClickListener {
     private static final int CAMERA_REQUEST = 0;
-    EditText nameEdit,cityEdit,phoneEdit;
-    Button resetPassword, saveChangesB, changePicB;
-    ImageView curruserPic;
-    ParseUser currentUser = ParseUser.getCurrentUser();
+    private static final int REQUEST_ADDRESS = 1;
+    protected EditText nameEdit,addressEdit,phoneEdit;
+    protected Button resetPassword, saveChangesB, changePicB;
+    protected ImageView curruserPic;
+    protected ParseUser currentUser = ParseUser.getCurrentUser();
 
-    ParseFile photoFile;
-    byte[] picByteArray;
-    Bitmap bmPic;
+    protected ParseFile photoFile;
+    protected byte[] picByteArray;
+    protected Bitmap bmPic;
+    protected Address address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -51,22 +56,21 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
 
         //show profile picture in the imageView
         ParseFile p = (ParseFile) currentUser.get("Photo");
-        try
-        {
-            Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
-            curruserPic.setImageBitmap(b);
-        }
-        catch (ParseException e)
-        {
-            Log.d("My Loggggg", e.getMessage().toString());
+        if(p!=null) {
+            try {
+                Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
+                curruserPic.setImageBitmap(b);
+            } catch (ParseException e) {
+                Log.d("My Loggggg", e.getMessage().toString());
+            }
         }
 
         nameEdit = (EditText) findViewById(R.id.profile_name_edit);
-        cityEdit = (EditText) findViewById(R.id.profile_user_city_edit);
+        addressEdit = (EditText) findViewById(R.id.profile_address_edit);
         phoneEdit = (EditText)findViewById(R.id.profile_user_phone_edit);
 
         nameEdit.setHint(currentUser.get("Name").toString());
-        cityEdit.setHint(currentUser.get("City").toString());
+        addressEdit.setHint(Utils.addressToString(currentUser.getJSONArray("address")));
         phoneEdit.setHint(currentUser.get("Phone").toString());
 
         resetPassword = (Button) findViewById(R.id.reset_password_button);
@@ -77,9 +81,15 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
         saveChangesB.setOnClickListener(this);
         changePicB.setOnClickListener(this);
 
-
+        ImageButton addressChangeButton = (ImageButton)findViewById(R.id.profile_address_change_edit);
+        addressChangeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent addressSelectionIntent = new Intent(ProfileEdit.this, AddressSelectionActivity.class);
+                startActivityForResult(addressSelectionIntent, REQUEST_ADDRESS);
+            }
+        });
     }
-
 
     @Override
     public void onClick(View v)
@@ -97,7 +107,7 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
                             public void onClick(DialogInterface dialog, int which)
                             {
                                 //send the reset to the mail, if not successful print exception.
-                                ParseUser.requestPasswordResetInBackground(input.getText().toString(), new RequestPasswordResetCallback()
+                                ParseUser.requestPasswordResetInBackground(input.getText().toString().toLowerCase(), new RequestPasswordResetCallback()
                                 {
                                     @Override
                                     public void done(ParseException e)
@@ -132,10 +142,11 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
                     currentUser.put("Name", nameEdit.getText().toString());
                 }
 
-                if (!(cityEdit.getText().toString().equals(currentUser.get("City").toString())))
+                if (address!=null)
                 {
-                    Log.d("My Loggggg", "city changed");
-                    currentUser.put("City", cityEdit.getText().toString());
+                    Log.d("My Loggggg", "address changed");
+                    currentUser.put("address", Utils.addressToJSONArray(address));
+                    currentUser.put("addressLocation",new ParseGeoPoint(address.getLatitude(),address.getLongitude()));
                 }
 
                 if (!(phoneEdit.getText().toString().equals(currentUser.get("Phone").toString())))
@@ -202,9 +213,12 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
             picByteArray = stream.toByteArray();
             //present the photo that is going to be save in circle view
             curruserPic.setImageBitmap(getCircleBitmap(bmPic));
+        }else if(resultCode == RESULT_OK && requestCode == REQUEST_ADDRESS){
+
+            Address address = data.getParcelableExtra("address");
+            addressEdit.setText(Utils.addressToString(address));
+            this.address = address;
         }
-
-
     }
 
     /**

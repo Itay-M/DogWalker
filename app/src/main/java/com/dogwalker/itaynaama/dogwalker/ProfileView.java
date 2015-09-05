@@ -47,7 +47,7 @@ public class ProfileView extends BaseActivity implements View.OnClickListener
 
         name.setText("Name: " + currentUser.get("Name").toString());
         userName.setText("UserName: " + currentUser.getUsername().toString());
-        userCity.setText("City: " + currentUser.get("City").toString());
+        userCity.setText("Address: " + Utils.addressToString(currentUser.getJSONArray("address"), ",\n"));
         userPhone.setText("Phone: " + currentUser.get("Phone").toString());
 
         ParseFile p = currentUser.getParseFile("Photo");
@@ -65,6 +65,11 @@ public class ProfileView extends BaseActivity implements View.OnClickListener
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchDetails();
+    }
 
     @Override
     public void onClick(View v)

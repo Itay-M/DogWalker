@@ -12,8 +12,9 @@
 
     <ImageView
         android:id="@+id/view_curr_pic"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/logo_transparent" />
 
     <Button
         android:id="@+id/change_pic_button"
@@ -31,13 +32,27 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 
-    <EditText
-        android:id="@+id/profile_user_city_edit"
-        android:textColor="@android:color/holo_green_light"
-        android:textSize="30dp"
-        android:textStyle="italic"
+    <LinearLayout
+        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content">
+
+        <EditText
+            android:id="@+id/profile_address_edit"
+            android:textColor="@android:color/holo_green_light"
+            android:textSize="30dp"
+            android:textStyle="italic"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/profile_address_change_edit"
+            android:src="@android:drawable/ic_menu_edit" />
+    </LinearLayout>
 
     <EditText
         android:id="@+id/profile_user_phone_edit"

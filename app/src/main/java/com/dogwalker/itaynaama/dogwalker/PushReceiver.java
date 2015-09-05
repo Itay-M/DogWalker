@@ -36,12 +36,12 @@ public class PushReceiver extends BroadcastReceiver {
     public void onReceive(final Context context, Intent intent) {
         if(intent.getAction().equals("com.dogwalker.itaynaama.dogwalker.WALKING_REQUEST")) {
             try {
-                // TODO take request objectId from JSONObject and push other data from Requests parse class
                 JSONObject data = new JSONObject(intent.getStringExtra(ParsePushBroadcastReceiver.KEY_PUSH_DATA));
 
-                // take id of request
+                // take ID of request
                 final String reqId = data.getString("reqId");
 
+                // take details of request and of requested user and create push
                 ParseQuery<ParseObject> requestQuery = new ParseQuery<>("Requests");
                 requestQuery.whereEqualTo("objectId", reqId);
                 requestQuery.include("from");
@@ -49,21 +49,7 @@ public class PushReceiver extends BroadcastReceiver {
                     @Override
                     public void done(ParseObject request, ParseException e) {
                         if (e == null && request != null) {
-                            ParseUser reqUser = request.getParseUser("from");
-                            Date pickupDate = request.getDate("datePickup");
-                            int pickupTime = request.getInt("timePickup");
-                            JSONArray pickupAddressLines = request.getJSONArray("address");
-                            ArrayList<String> pickupAddress = new ArrayList<>(pickupAddressLines.length());
-                            for (int i = 0; i < pickupAddressLines.length(); i++) {
-                                try {
-                                    pickupAddress.add(pickupAddressLines.getString(i));
-                                } catch (JSONException e1) {
-                                    Log.d("PushReceiver",e1.getMessage());
-                                }
-                            }
-                            ParseGeoPoint addressLocation = request.getParseGeoPoint("addressLocation");
-
-                            createPush(context, reqUser, pickupDate, pickupTime, pickupAddress, addressLocation.getLatitude(), addressLocation.getLongitude());
+                            createPush(context,request );
                         } else {
                             Log.d("PushReceiver", e.getMessage());
                         }
@@ -76,22 +62,18 @@ public class PushReceiver extends BroadcastReceiver {
         }
     }
 
-    static public void createPush(Context context,ParseUser user,Date date,int time,ArrayList<String> address,double addressLat, double addressLng){
+    static public void createPush(Context context,ParseObject request){
+        // take requesting user
+        ParseUser user = request.getParseUser("from");
+        // building notification
         android.support.v4.app.NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.notification_icon)
-                        .setContentTitle("DogWalking request")
-                        .setContentText(user.getUsername() + " want you to take out his/her dog.");
+                .setSmallIcon(R.drawable.notification_icon)
+                .setContentTitle("DogWalking request")
+                .setContentText(user.getUsername() + " want you to take out his/her dog.");
 
         mBuilder.setDefaults(Notification.DEFAULT_SOUND);
 
-        Intent resultIntent = new Intent(context, WalkerRequestActivity.class);
-        resultIntent.setAction(context.getString(R.string.walking_request_intent_action));
-        resultIntent.putExtra("date", date);
-        resultIntent.putExtra("time", time);
-        resultIntent.putExtra("user",user.getObjectId());
-        resultIntent.putStringArrayListExtra("address", address);
-        resultIntent.putExtra("addressLat", addressLat);
-        resultIntent.putExtra("addressLng",addressLng);
+        Intent resultIntent = WalkerRequestActivity.prepareIntent(context, request);
 
         // Because clicking the notification opens a new ("special") activity, there's
         // no need to create an artificial back stack.
@@ -105,8 +87,9 @@ public class PushReceiver extends BroadcastReceiver {
 
         mBuilder.setContentIntent(resultPendingIntent);
 
+        //TODO handle in case of 2 notification
         // Sets an ID for the notification
-        int mNotificationId = 001;
+        int mNotificationId = request.getObjectId().hashCode();
         // Gets an instance of the NotificationManager service
         NotificationManager mNotifyMgr =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);

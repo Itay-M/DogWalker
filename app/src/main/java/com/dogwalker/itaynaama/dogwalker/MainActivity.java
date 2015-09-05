@@ -13,6 +13,8 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 
 import com.parse.FindCallback;
@@ -36,6 +38,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
     protected Button theSearchButton;
     protected ImageView profilePicFromParse;
     protected ListView walkerRequestsList;
+    protected ListView myRequestsList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -45,10 +48,33 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
 
         //imageView
         profilePicFromParse = (ImageView)findViewById(R.id.profilePic);
+
         //button setup
         theSearchButton = (Button) findViewById(R.id.searchButton);
+
         // walker requests list
         walkerRequestsList = (ListView)findViewById(R.id.main_walker_requests_list);
+
+        walkerRequestsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ParseObject request = (ParseObject)parent.getAdapter().getItem(position);
+                Intent i = WalkerRequestActivity.prepareIntent(MainActivity.this, request);
+                startActivity(i);
+            }
+        });
+
+        // my request list
+        myRequestsList =(ListView)findViewById(R.id.main_my_request_list);
+
+        myRequestsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                ParseObject myReq = (ParseObject)parent.getAdapter().getItem(position);
+                Intent i = WalkerRequestActivity.prepareIntent(MainActivity.this, myReq);
+                startActivity(i);
+            }
+        });
 
         //hide the actionBar's back button
         getSupportActionBar().setDisplayHomeAsUpEnabled(false);
@@ -59,13 +85,21 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
 
         // initialize requests list view
         TextView walkerRequestsListHeader = new TextView(this);
-        walkerRequestsListHeader.setText("Walking Requests");
-        walkerRequestsList.addHeaderView(walkerRequestsListHeader);
+
 
         // retrieve walker requests and fill the list
         retrieveWalkerRequests();
+
+        // initialize my request list view
+        TextView myRequestsListHeader = new TextView(this);
+
+        // retrieve my requests and fill the list
+        retrieveMyRequests();
     }
 
+    /**
+     * take all request that send to user
+     */
     protected void retrieveWalkerRequests(){
         ParseQuery<ParseObject> requestsQuery = new ParseQuery<>("Requests");
         requestsQuery.whereEqualTo("to",ParseUser.getCurrentUser());
@@ -75,8 +109,34 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         requestsQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> requests, ParseException e) {
-                ListAdapter adapter = new WalkerRequestsListAdapter(MainActivity.this,requests);
-                walkerRequestsList.setAdapter(adapter);
+                if(e==null) {
+                    ListAdapter adapter = new WalkerRequestsListAdapter(MainActivity.this, requests, "from");
+                    walkerRequestsList.setAdapter(adapter);
+                }else{
+                    Log.e("MainActivity",e.getMessage());
+                }
+            }
+        });
+    }
+
+    /**
+     * take all request that send from user
+     */
+    protected void retrieveMyRequests(){
+        ParseQuery<ParseObject> requestsQuery = new ParseQuery<>("Requests");
+        requestsQuery.whereEqualTo("from",ParseUser.getCurrentUser());
+        requestsQuery.include("to");
+        requestsQuery.addDescendingOrder("datePickup");
+        requestsQuery.addDescendingOrder("timePickup");
+        requestsQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> requests, ParseException e) {
+                if(e==null) {
+                    ListAdapter adapter = new WalkerRequestsListAdapter(MainActivity.this, requests, "to");
+                    myRequestsList.setAdapter(adapter);
+                }else{
+                    Log.e("MainActivity",e.getMessage());
+                }
             }
         });
     }
@@ -86,6 +146,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
     {
         super.onResume();
         currentUserHandle();
+
+        retrieveWalkerRequests();
+        retrieveMyRequests();
     }
 
     @Override
@@ -94,39 +157,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         switch (v.getId())
         {
             case (R.id.searchButton):
-                // Acquire a reference to the system Location Manager
-                LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-                // check if the device's gps is turned on
-                boolean gps_enabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                // if gps isn't turned on - ask the user if he/she wants to activate it
-                if (!gps_enabled)
-                {
-                    final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-                    alertBuilder.setMessage("enable GPS?")
-                            .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                            {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which)
-                                {
-                                    Intent gpsOptionsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                    startActivity(gpsOptionsIntent);
-                                }
-                            })
-                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-                            {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which)
-                                {
-                                    Log.d("My Loggggg", "user canceled");
-                                }
-                            });
-                    alertBuilder.show();
-                }
-                else
-                {
                     Intent i = new Intent(this, WalkerSearchActivity.class);
                     startActivity(i);
-                }
+                break;
         }
     }
 
@@ -163,7 +196,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
             installation.saveEventually();
 
             ParseUser currentUser = ParseUser.getCurrentUser();
-//            setTitle(currentUser.getUsername());//set the title in the action bar to be the username.
+
+            // setTitle(currentUser.getUsername());//set the title in the action bar to be the username.
             Log.d("My Loggggg", "user exists and logged in");
             Log.d("My Loggggg", "the username that logged in is - " + currentUser.getUsername());
 
@@ -176,6 +210,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
                 if(p != null) {
                     Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
                     profilePicFromParse.setImageBitmap(b);
+                }else{
+                    profilePicFromParse.setImageResource(R.drawable.logo);
                 }
             }
             catch (ParseException e)
