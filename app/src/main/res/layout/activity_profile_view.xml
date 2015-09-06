@@ -23,39 +23,40 @@
 
     <TextView
         android:id="@+id/profile_name"
-        android:text="."
         android:textColor="@android:color/holo_green_light"
         android:textSize="30dp"
         android:textStyle="italic"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:hint="Name"
+        android:singleLine="false" />
 
     <TextView
         android:id="@+id/profile_user_name"
-        android:text=".."
         android:textColor="@android:color/holo_green_light"
         android:textSize="30dp"
         android:textStyle="italic"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:hint="Username" />
 
     <TextView
         android:id="@+id/profile_user_city"
-        android:text="..."
         android:textColor="@android:color/holo_green_light"
         android:textSize="30dp"
         android:textStyle="italic"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:hint="Address" />
 
     <TextView
         android:id="@+id/profile_user_phone"
-        android:text="...."
         android:textColor="@android:color/holo_green_light"
         android:textSize="30dp"
         android:textStyle="italic"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:hint="Phone" />
 
 
 

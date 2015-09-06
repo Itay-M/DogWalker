@@ -97,13 +97,13 @@ public class WalkerRequestActivity extends BaseActivity {
         phoneText.setText((String)userRequested.get("Phone"));
 
         Date date = (Date)intent.getSerializableExtra("date");
-        dateText.setText(WalkerSearchActivity.DISPLAY_DATE_FORMAT.format(date));
+        dateText.setText(Utils.DISPLAY_DATE_FORMAT.format(date));
 
         int puTime = intent.getIntExtra("time", 0);
         Calendar time = Calendar.getInstance();
         time.set(Calendar.HOUR_OF_DAY,puTime/60);
         time.set(Calendar.MINUTE,puTime%60);
-        timeText.setText(WalkerSearchActivity.DISPLAY_TIME_FORMAT.format(time.getTime()));
+        timeText.setText(Utils.DISPLAY_TIME_FORMAT.format(time.getTime()));
 
         ArrayList<String> addressLines = intent.getStringArrayListExtra("address");
         StringBuilder addressTextValue = new StringBuilder();

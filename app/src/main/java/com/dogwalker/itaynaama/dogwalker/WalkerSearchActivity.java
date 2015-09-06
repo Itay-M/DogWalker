@@ -45,15 +45,14 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 public class WalkerSearchActivity extends BaseActivity implements DatePickerFragment.DatePickerListener, TimePickerFragment.TimePickerListener {
     private static final int REQUEST_ADDRESS = 1;
     private static final int REQUEST_USER = 2;
-
-    public static final java.text.DateFormat DISPLAY_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
-    public static final java.text.DateFormat DISPLAY_TIME_FORMAT = new SimpleDateFormat("HH:mm");
 
     protected Button locationButton;
     protected Button searchWalker;
@@ -74,6 +73,9 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
         timeText = (TextView)findViewById(R.id.walker_search_time);
         searchWalker = (Button)findViewById(R.id.walker_search_search_btn);
         addressText = (TextView)findViewById(R.id.walker_search_address);
+
+        dateText.setText(Utils.DISPLAY_DATE_FORMAT.format(new Date()));
+        timeText.setText(Utils.DISPLAY_TIME_FORMAT.format(new Date()));
 
         //handle location choosing button
         locationButton.setOnClickListener(new View.OnClickListener() {
@@ -119,12 +121,15 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
 
                 // found walkers that can according to criterion
                 ParseQuery<ParseObject> availabilityQuery = new ParseQuery("UserAvailability");
-                availabilityQuery.whereEqualTo("dayOfWeek", datePickerFragment.getDate().get(Calendar.DAY_OF_WEEK));
+                //availabilityQuery.whereEqualTo("dayOfWeek", datePickerFragment.getDate().get(Calendar.DAY_OF_WEEK));
+                availabilityQuery.whereContainsAll("days", Collections.singleton(datePickerFragment.getDate().get(Calendar.DAY_OF_WEEK)));
                 availabilityQuery.whereLessThanOrEqualTo("startTime", time);
                 availabilityQuery.whereGreaterThanOrEqualTo("endTime", time);
                 availabilityQuery.selectKeys(Arrays.asList("user"));
-                availabilityQuery.whereMatchesKeyInQuery("user","objectId",usersQuery);
+                availabilityQuery.whereMatchesKeyInQuery("user", "objectId", usersQuery);
                 availabilityQuery.include("user");
+
+
 
                 // retrieval all users from DB
                 availabilityQuery.findInBackground(new FindCallback<ParseObject>() {
@@ -203,15 +208,15 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                                     @Override
                                     public void done(ParseException e) {
                                         if(e==null){
-                                            showMessageBox("Request Sent","A request has been sent to the selected Walker");
+                                            Utils.showMessageBox(WalkerSearchActivity.this,"Request Sent", "A request has been sent to the selected Walker");
                                         }else{
-                                            showMessageBox("Send Request Failed","The message not send, try later");
+                                            Utils.showMessageBox(WalkerSearchActivity.this,"Send Request Failed", "The message not send, try later");
                                             Log.e("Push",e.getMessage());
                                         }
                                     }
                                 });
                             }else{
-                                showMessageBox("Send Request Failed","The message not send, try later");
+                                Utils.showMessageBox(WalkerSearchActivity.this,"Send Request Failed", "The message not send, try later");
                                 Log.e("SaveRequest", e.getMessage());
                             }
                         }
@@ -221,25 +226,17 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
         }
     }
 
-    // create message box
-    public void showMessageBox(String title, String msg){
-        AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(WalkerSearchActivity.this);
-        dlgAlert.setTitle(title);
-        dlgAlert.setMessage(msg);
-        dlgAlert.setCancelable(true);
-        dlgAlert.create().show();
-    }
 
     @Override
     public void onDateSelected(Calendar date) {
-        dateText.setText(DISPLAY_DATE_FORMAT.format(date.getTime()));
+        dateText.setText(Utils.DISPLAY_DATE_FORMAT.format(date.getTime()));
         this.date = date;
     }
 
     @Override
     public void onTimeSelected(Calendar time) {
 
-        timeText.setText(DISPLAY_TIME_FORMAT.format(time.getTime()));
+        timeText.setText(Utils.DISPLAY_TIME_FORMAT.format(time.getTime()));
         this.time = time.get(Calendar.HOUR_OF_DAY)*60+time.get(Calendar.MINUTE);
     }
 

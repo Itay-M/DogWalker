@@ -44,8 +44,8 @@ public class WalkerRequestsListAdapter extends ArrayAdapter<ParseObject> {
         // fill in row views
         nameText.setText(request.getParseUser(userKey).getString("Name"));
         addressText.setText(Utils.addressToString(request.getJSONArray("address"), ", "));
-        dateText.setText(WalkerSearchActivity.DISPLAY_DATE_FORMAT.format(request.getDate("datePickup")));
-        timeText.setText(WalkerSearchActivity.DISPLAY_TIME_FORMAT.format(new Date(request.getInt("timePickup")*60*1000)));
+        dateText.setText(Utils.DISPLAY_DATE_FORMAT.format(request.getDate("datePickup")));
+        timeText.setText(Utils.formatMinutesAsTime(request.getInt("timePickup")));
 
         // TODO Image
 

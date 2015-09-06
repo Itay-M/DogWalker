@@ -136,7 +136,7 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
                 break;
 
             case (R.id.save_changes_button):
-                if (!(nameEdit.getText().toString().equals(currentUser.get("Name").toString())))
+                if (!(nameEdit.getText().toString().isEmpty()))
                 {
                     Log.d("My Loggggg", "name changed");
                     currentUser.put("Name", nameEdit.getText().toString());
@@ -149,7 +149,7 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
                     currentUser.put("addressLocation",new ParseGeoPoint(address.getLatitude(),address.getLongitude()));
                 }
 
-                if (!(phoneEdit.getText().toString().equals(currentUser.get("Phone").toString())))
+                if (!(phoneEdit.getText().toString().isEmpty()))
                 {
                     Log.d("My Loggggg", "phone changed");
                     currentUser.put("Phone", phoneEdit.getText().toString());

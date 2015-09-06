@@ -31,6 +31,7 @@ public class UserSelectionListAdapter extends ArrayAdapter<WalkerSearchActivity.
 
         TextView username = (TextView)row.findViewById(R.id.result_row_username);
         TextView address = (TextView)row.findViewById(R.id.result_row_distance);
+        TextView age = (TextView)row.findViewById(R.id.result_row_age);
 
         username.setText(user.getUsername());
 

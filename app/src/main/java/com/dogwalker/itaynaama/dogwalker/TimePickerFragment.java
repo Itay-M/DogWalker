@@ -3,6 +3,7 @@ package com.dogwalker.itaynaama.dogwalker;
 import android.app.Activity;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.text.format.DateFormat;
@@ -29,11 +30,8 @@ public class TimePickerFragment extends DialogFragment
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        if(!(activity instanceof TimePickerListener)){
-            throw new RuntimeException("Activity must implement TimePickerListener interface");
-        }
-
-        listener = (TimePickerListener)activity;
+        if(activity instanceof TimePickerListener && listener==null)
+            listener = (TimePickerListener)activity;
     }
 
     @Override
@@ -57,5 +55,8 @@ public class TimePickerFragment extends DialogFragment
         void onTimeSelected(Calendar time);
     }
 
+    public void setListener(TimePickerListener listener) {
+        this.listener = listener;
+    }
 }
 

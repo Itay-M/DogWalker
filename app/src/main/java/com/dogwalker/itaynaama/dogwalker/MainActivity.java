@@ -83,15 +83,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         //check if there is a current user logged in
         currentUserHandle();
 
-        // initialize requests list view
-        TextView walkerRequestsListHeader = new TextView(this);
-
-
         // retrieve walker requests and fill the list
         retrieveWalkerRequests();
-
-        // initialize my request list view
-        TextView myRequestsListHeader = new TextView(this);
 
         // retrieve my requests and fill the list
         retrieveMyRequests();
@@ -221,7 +214,6 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
                             }
         }
     }
-
 
     /**
      * when the back button pressed, the user asked if he wants to exit the app.

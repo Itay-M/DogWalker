@@ -30,7 +30,8 @@
         android:textSize="30dp"
         android:textStyle="italic"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:hint="Name  edit" />
 
     <LinearLayout
         android:orientation="horizontal"
@@ -45,7 +46,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:enabled="false"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:hint="Address edit" />
 
         <ImageButton
             android:layout_width="wrap_content"
@@ -60,7 +62,8 @@
         android:textSize="30dp"
         android:textStyle="italic"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:hint="Phone edit" />
 
     <TextView
         android:id="@+id/reset_mail_question"
