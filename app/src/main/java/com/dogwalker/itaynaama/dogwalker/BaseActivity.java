@@ -51,10 +51,6 @@ public class BaseActivity extends AppCompatActivity
                 logout();
                 return true;
 
-            case R.id.action_settings:
-                launchSettings();
-                return true;
-
             case R.id.view_profile_action:
                 viewProfile();
                 return true;
@@ -92,11 +88,6 @@ public class BaseActivity extends AppCompatActivity
         startActivity(i);
     }
 
-    private void launchSettings()
-    {
-
-    }
-
     /**
      * Edit user's profile.
      */
@@ -105,7 +96,5 @@ public class BaseActivity extends AppCompatActivity
         Intent i = new Intent(this, ProfileView.class);
         startActivity(i);
     }
-
-
 
 }
