@@ -16,9 +16,9 @@ import com.parse.ParseUser;
 
 public class ProfileView extends BaseActivity implements View.OnClickListener
 {
-    ImageView viewPic;
-    TextView name, userName, userCity, userPhone;
-    Button editButton;
+    protected ImageView viewPic;
+    protected TextView name, userName, userCity, userPhone;
+    protected Button editButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -34,7 +34,7 @@ public class ProfileView extends BaseActivity implements View.OnClickListener
         userPhone = (TextView)findViewById(R.id.profile_user_phone);
 
         editButton.setOnClickListener(this);
-
+        
         fetchDetails();
     }
 

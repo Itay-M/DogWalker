@@ -7,6 +7,8 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Location;
 import android.support.v4.app.DialogFragment;
@@ -19,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
@@ -26,6 +29,7 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import com.parse.FindCallback;
 import com.parse.Parse;
 import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseInstallation;
 import com.parse.ParseObject;
@@ -128,8 +132,6 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                 availabilityQuery.selectKeys(Arrays.asList("user"));
                 availabilityQuery.whereMatchesKeyInQuery("user", "objectId", usersQuery);
                 availabilityQuery.include("user");
-
-
 
                 // retrieval all users from DB
                 availabilityQuery.findInBackground(new FindCallback<ParseObject>() {
@@ -247,6 +249,8 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
         private String username;
         private String address;
         private String objectId;
+        private Date bornDate;
+        private byte[] profilePicture;
         private double addressLocationLat;
         private double addressLocationLng;
 
@@ -256,9 +260,21 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
             username = user.getUsername();
             address = user.getString("address");
             objectId = user.getObjectId();
+            bornDate = user.getDate("bornDate");
             ParseGeoPoint addressLocation = user.getParseGeoPoint("addressLocation");
             addressLocationLat = addressLocation.getLatitude();
             addressLocationLng = addressLocation.getLongitude();
+
+            ParseFile p = user.getParseFile("Photo");
+            try{
+                if(p != null) {
+                    profilePicture = p.getData();
+                }else{
+                    profilePicture = null;
+                }
+            }catch (ParseException e){
+                Log.d("My Loggggg", e.getMessage().toString());
+            }
         }
 
         public ParseGeoPoint getAddressLocation() {
@@ -275,6 +291,21 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
 
         public String getObjectId() {
             return objectId;
+        }
+
+        public byte[] getProfilePicture() {
+            return profilePicture;
+        }
+
+        public double getAge() {
+            double age=0;
+            Calendar today = Calendar.getInstance();
+            long todayInMillis = today.getTimeInMillis();
+            long bornInMillis = bornDate.getTime();
+
+            age = (todayInMillis-bornInMillis)/1000.0/60/60/24/365;
+
+            return age;
         }
     }
 }

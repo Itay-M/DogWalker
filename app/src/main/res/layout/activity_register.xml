@@ -56,6 +56,21 @@
             android:id="@+id/regAddressButton" />
 
         <TextView
+            android:text="Born date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:id="@+id/regBornDate" />
+
+        <DatePicker
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/regDatePicker"
+            android:layout_gravity="center_horizontal"
+            android:datePickerMode="spinner"
+            android:calendarViewShown="false" />
+
+        <TextView
             android:text="Phone number:"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -128,7 +143,7 @@
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/register_availability_items"></LinearLayout>
 
         <Button

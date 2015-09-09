@@ -28,6 +28,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -56,6 +57,7 @@ public class Register extends AppCompatActivity implements View.OnClickListener
     protected ImageView newProfilePicIV;
     protected EditText nameET,usernameET,emailET,passwordET,phoneET,addressET;
     protected Address address;
+    protected DatePicker bornDateDP;
     SharedPreferences userPref;
     ParseFile photoFile;
     byte[] picByteArray;
@@ -82,9 +84,11 @@ public class Register extends AppCompatActivity implements View.OnClickListener
         addressET = (EditText)findViewById(R.id.regAddressEditText);
         passwordET = (EditText)findViewById(R.id.regPasswordEditText);
         phoneET = (EditText)findViewById(R.id.regPhoneEditText);
+        bornDateDP = (DatePicker)findViewById(R.id.regDatePicker);
 
         // availability
         availabilityAdapter = new UserAvailabilityAdapter(this);
+        availabilityAdapter.add(new AvailabilityRecord());
         final LinearLayout availabilityItems = (LinearLayout)findViewById(R.id.register_availability_items);
         availabilityAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -131,150 +135,6 @@ public class Register extends AppCompatActivity implements View.OnClickListener
         });
     }
 
-    static private class UserAvailabilityAdapter extends ArrayAdapter<AvailabilityRecord> implements View.OnClickListener {
-        private final TimePickerFragment timePicker = new TimePickerFragment();
-
-        public UserAvailabilityAdapter(FragmentActivity context){
-            super(context,R.layout.user_availablity_row,R.id.availability_row_from);
-            add(new AvailabilityRecord());
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View row = super.getView(position, convertView, parent);
-
-            final AvailabilityRecord record = getItem(position);
-
-
-            TextView fromTextView = (TextView)row.findViewById(R.id.availability_row_from);
-            fromTextView.setText(Utils.formatMinutesAsTime(record.getTimeFrom()));
-            fromTextView.setTag(record);
-            fromTextView.setOnClickListener(this);
-
-            TextView untilTextView = (TextView)row.findViewById(R.id.availability_row_until);
-            untilTextView.setText(Utils.formatMinutesAsTime(record.getTimeUntil()));
-            untilTextView.setTag(record);
-            untilTextView.setOnClickListener(this);
-
-            // add record remove button in all records except the last
-            ImageView removeButton = (ImageView)row.findViewById(R.id.availability_row_remove);
-            removeButton.setVisibility(position == getCount() - 1 ? View.GONE : View.VISIBLE);
-            removeButton.setTag(record);
-            removeButton.setOnClickListener(this);
-
-            // add record add button in the last record
-            ImageView addButton = (ImageView)row.findViewById(R.id.availability_row_add);
-            addButton.setVisibility(position == getCount() - 1 ? View.VISIBLE : View.GONE);
-            addButton.setTag(record);
-            addButton.setOnClickListener(this);
-
-            for(int i=0;i<7;i++) {
-                CheckBox chk = (CheckBox) row.findViewById(getContext().getResources().getIdentifier("availability_row_day"+(i+1),"id",getClass().getPackage().getName()));
-                chk.setChecked(record.isDaySelected(i));
-                chk.setTag(i);
-                chk.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                    @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        record.setDay((Integer)buttonView.getTag(),isChecked);
-                    }
-                });
-            }
-            return row;
-        }
-
-        @Override
-        public void onClick(final View v) {
-            switch(v.getId()){
-                case R.id.availability_row_remove:
-                    remove((AvailabilityRecord)v.getTag());
-                    notifyDataSetChanged();
-                    break;
-                case R.id.availability_row_add:
-                    AvailabilityRecord record = (AvailabilityRecord)v.getTag();
-                    if(record.isValid()) {
-                        add(new AvailabilityRecord());
-                        notifyDataSetChanged();
-                    }else{
-                        Utils.showMessageBox(v.getContext(),"Invalid period","Please select at least 1 day and make sure the start time is before the end time.");
-                    }
-                    break;
-                case R.id.availability_row_from:
-                    timePicker.setListener(new TimePickerFragment.TimePickerListener() {
-                        @Override
-                        public void onTimeSelected(Calendar time) {
-                            AvailabilityRecord record = (AvailabilityRecord)v.getTag();
-                            record.setTimeFrom(time.get(Calendar.HOUR_OF_DAY)*60+time.get(Calendar.MINUTE));
-                            notifyDataSetChanged();
-                        }
-                    });
-                    timePicker.show(((FragmentActivity)getContext()).getSupportFragmentManager(),"timePicker");
-                    break;
-                case R.id.availability_row_until:
-                    timePicker.setListener(new TimePickerFragment.TimePickerListener() {
-                        @Override
-                        public void onTimeSelected(Calendar time) {
-                            AvailabilityRecord record = (AvailabilityRecord) v.getTag();
-                            record.setTimeUntil(time.get(Calendar.HOUR_OF_DAY) * 60 + time.get(Calendar.MINUTE));
-                            notifyDataSetChanged();
-                        }
-                    });
-                    timePicker.show(((FragmentActivity)getContext()).getSupportFragmentManager(),"timePicker");
-                    break;
-            }
-        }
-
-    }
-
-    private static class AvailabilityRecord{
-        private int timeFrom;
-        private int timeUntil;
-        private boolean[] days = new boolean[7];
-
-        public int getTimeFrom() {
-            return timeFrom;
-        }
-
-        public void setTimeFrom(int timeFrom) {
-            this.timeFrom = timeFrom;
-        }
-
-        public int getTimeUntil() {
-            return timeUntil;
-        }
-
-        public void setTimeUntil(int timeUntil) {
-            this.timeUntil = timeUntil;
-        }
-
-        public void setDay(int dayOfWeek, boolean selected){
-            days[dayOfWeek] = selected;
-        }
-
-        public boolean isDaySelected(int dayOfWeek){
-            return days[dayOfWeek];
-        }
-
-        public boolean isValid(){
-            return timeFrom<timeUntil && !Arrays.equals(days,new boolean[7]);
-        }
-
-        public ParseObject toParseObject(){
-            ParseObject record = new ParseObject("UserAvailability");
-            record.put("startTime", timeFrom);
-            record.put("endTime", timeUntil);
-            JSONArray arrDays = new JSONArray();
-            for (int i=0;i<days.length;i++){
-                if(days[i]) {
-                    arrDays.put(i+1);
-                }
-            }
-            record.put("days",arrDays);
-
-            return record;
-        }
-    }
-
-
     @Override
     public void onClick(View v)
     {
@@ -295,6 +155,14 @@ public class Register extends AppCompatActivity implements View.OnClickListener
                 user.put("Phone", phoneET.getText().toString());
                 user.put("addressLocation",new ParseGeoPoint(address.getLatitude(),address.getLongitude()));
 
+                // save born date
+                int day = bornDateDP.getDayOfMonth()+ 1;
+                int month = bornDateDP.getMonth();
+                int year = bornDateDP.getYear();
+                Calendar c = Calendar.getInstance();
+                c.set(year,month,day);
+                user.put("bornDate",c.getTime());
+
                 //if the new user took a profile picture - save it to parse data base
                 Log.d("My Loggggg", String.valueOf(pictureTaken));
                 if (pictureTaken)
@@ -314,7 +182,6 @@ public class Register extends AppCompatActivity implements View.OnClickListener
                     user.put("Photo", photoFile);
                     user.saveInBackground();
                 }
-
 
                 //register the new user in Parse database.
                 user.signUpInBackground(new SignUpCallback()

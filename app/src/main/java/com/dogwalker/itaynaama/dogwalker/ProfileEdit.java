@@ -2,6 +2,7 @@ package com.dogwalker.itaynaama.dogwalker;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.DataSetObserver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -23,15 +24,24 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.parse.DeleteCallback;
+import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.RequestPasswordResetCallback;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 public class ProfileEdit extends AppCompatActivity implements View.OnClickListener {
     private static final int CAMERA_REQUEST = 0;
@@ -40,7 +50,8 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
     protected Button resetPassword, saveChangesB, changePicB;
     protected ImageView curruserPic;
     protected ParseUser currentUser = ParseUser.getCurrentUser();
-
+    protected UserAvailabilityAdapter availabilityAdapter;
+    protected List<ParseObject> userAvailabilitiesList;
     protected ParseFile photoFile;
     protected byte[] picByteArray;
     protected Bitmap bmPic;
@@ -87,6 +98,57 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
             public void onClick(View v) {
                 Intent addressSelectionIntent = new Intent(ProfileEdit.this, AddressSelectionActivity.class);
                 startActivityForResult(addressSelectionIntent, REQUEST_ADDRESS);
+            }
+        });
+
+        // user availability
+        availabilityAdapter = new UserAvailabilityAdapter(this);
+        final LinearLayout availabilityItems = (LinearLayout)findViewById(R.id.edit_profile_availability_items);
+
+        // connect between adapter to component
+        availabilityAdapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                availabilityItems.removeAllViews();
+                for (int i = 0; i < availabilityAdapter.getCount(); i++) {
+                    View row = availabilityAdapter.getView(i, null, availabilityItems);
+                    availabilityItems.addView(row);
+                }
+            }
+
+            @Override
+            public void onInvalidated() {
+                availabilityItems.removeAllViews();
+            }
+        });
+
+        // take all data of availability of current user
+        final ParseQuery<ParseObject> userAvailabilityQuery = new ParseQuery<>("UserAvailability");
+        userAvailabilityQuery.whereEqualTo("user", currentUser);
+
+        userAvailabilityQuery.findInBackground(new FindCallback<ParseObject>() {
+            @Override
+            public void done(List<ParseObject> userAvailabilities, ParseException e) {
+                if (e == null) {
+                    userAvailabilitiesList = userAvailabilities;
+                    int id = 0;
+                    for (ParseObject userAvailability : userAvailabilities) {
+                        AvailabilityRecord record = new AvailabilityRecord();
+                        record.setTimeFrom(userAvailability.getInt("startTime"));
+                        record.setTimeUntil(userAvailability.getInt("endTime"));
+                        record.setTag(id++);
+                        JSONArray days = userAvailability.getJSONArray("days");
+                        for (int i = 0; i < days.length(); i++) {
+                            try {
+                                record.setDay(days.getInt(i)-1, true);
+                            } catch (JSONException e1) {
+                            }
+                        }
+                        availabilityAdapter.add(record);
+                    }
+                    availabilityAdapter.add(new AvailabilityRecord());
+                    availabilityAdapter.notifyDataSetChanged();
+                }
             }
         });
     }
@@ -172,6 +234,35 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
                     }
                     currentUser.put("Photo", photoFile);
 //                    currentUser.saveInBackground();
+                }
+
+                //save changes in user availability
+                for(int i=0;i<availabilityAdapter.getCount()-1;i++){
+                    Integer id = (Integer)availabilityAdapter.getItem(i).getTag();
+                    AvailabilityRecord record = availabilityAdapter.getItem(i);
+                    if(id != null){
+                        ParseObject userAvailability = userAvailabilitiesList.get(id);
+                        userAvailabilitiesList.set(id,null);
+                        record.toParseObject(userAvailability);
+                        userAvailability.saveInBackground();
+                    }else{
+                        ParseObject newUserAvailability = record.toParseObject();
+                        newUserAvailability.put("user",currentUser);
+                        newUserAvailability.saveInBackground();
+                    }
+                }
+                // remove from parse all availabilities that user remove
+                for(ParseObject availability: userAvailabilitiesList) {
+                    if(availability!=null) {
+                        availability.deleteInBackground(new DeleteCallback() {
+                            @Override
+                            public void done(ParseException e) {
+                                if(e!=null){
+                                    Log.e("DeleteParseObject", e.getMessage());
+                                }
+                            }
+                        });
+                    }
                 }
 
                 try

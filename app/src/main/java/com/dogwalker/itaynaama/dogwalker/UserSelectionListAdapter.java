@@ -1,14 +1,18 @@
 package com.dogwalker.itaynaama.dogwalker;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.parse.ParseGeoPoint;
 import com.parse.ParseUser;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,13 +35,24 @@ public class UserSelectionListAdapter extends ArrayAdapter<WalkerSearchActivity.
 
         TextView username = (TextView)row.findViewById(R.id.result_row_username);
         TextView address = (TextView)row.findViewById(R.id.result_row_distance);
+        ImageView photo = (ImageView)row.findViewById(R.id.result_row_photo);
         TextView age = (TextView)row.findViewById(R.id.result_row_age);
 
         username.setText(user.getUsername());
 
-        double distance = pickUpLocation.distanceInKilometersTo(user.getAddressLocation());
-        address.setText((((int)(distance*10))/10.0)+" km");
+        //show the profile picture of available user if not exist showed default photo
+        byte[] p = user.getProfilePicture();
+        if(p!=null) {
+            Bitmap b = BitmapFactory.decodeByteArray(p, 0, p.length);
+            photo.setImageBitmap(b);
+        }
 
+        // calculate distance from pickup address to available user
+        double distance = pickUpLocation.distanceInKilometersTo(user.getAddressLocation());
+        address.setText((((int) (distance * 10)) / 10.0) + " km");
+
+        // show age of user
+        age.setText((((int)(user.getAge()*10))/10.0)+" years old");
         return row;
     }
 }
