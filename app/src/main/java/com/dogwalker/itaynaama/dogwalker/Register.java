@@ -32,6 +32,7 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.parse.ParseException;
@@ -63,6 +64,8 @@ public class Register extends AppCompatActivity implements View.OnClickListener
     byte[] picByteArray;
     Bitmap bmPic;
     private UserAvailabilityAdapter availabilityAdapter;
+    protected Switch phoneSwitch;
+    protected Boolean sharePhone = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -85,6 +88,9 @@ public class Register extends AppCompatActivity implements View.OnClickListener
         passwordET = (EditText)findViewById(R.id.regPasswordEditText);
         phoneET = (EditText)findViewById(R.id.regPhoneEditText);
         bornDateDP = (DatePicker)findViewById(R.id.regDatePicker);
+
+        //switch
+        phoneSwitch = (Switch) findViewById(R.id.phone_switch);
 
         // availability
         availabilityAdapter = new UserAvailabilityAdapter(this);
@@ -111,6 +117,22 @@ public class Register extends AppCompatActivity implements View.OnClickListener
         registerB.setOnClickListener(this);
         pictureB.setOnClickListener(this);
         addressB.setOnClickListener(this);
+
+        phoneSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
+            {
+                if (isChecked)
+                {
+                    sharePhone = true;
+                }
+                else
+                {
+                    sharePhone = false;
+                }
+            }
+        });
 
         userPref = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -154,13 +176,14 @@ public class Register extends AppCompatActivity implements View.OnClickListener
                 user.put("address", Utils.addressToJSONArray(address));
                 user.put("Phone", phoneET.getText().toString());
                 user.put("addressLocation",new ParseGeoPoint(address.getLatitude(),address.getLongitude()));
+                user.put("sharePhone",sharePhone);
 
                 // save born date
                 int day = bornDateDP.getDayOfMonth()+ 1;
                 int month = bornDateDP.getMonth();
                 int year = bornDateDP.getYear();
                 Calendar c = Calendar.getInstance();
-                c.set(year,month,day);
+                c.set(year, month, day);
                 user.put("bornDate",c.getTime());
 
                 //if the new user took a profile picture - save it to parse data base

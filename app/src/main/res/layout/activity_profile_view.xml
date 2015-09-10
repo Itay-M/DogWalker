@@ -59,6 +59,14 @@
         android:layout_height="wrap_content"
         android:hint="Phone" />
 
+    <TextView
+        android:id="@+id/profile_user_sharePhone"
+        android:textColor="@android:color/holo_green_light"
+        android:textSize="30dp"
+        android:textStyle="italic"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 
 
 </LinearLayout>

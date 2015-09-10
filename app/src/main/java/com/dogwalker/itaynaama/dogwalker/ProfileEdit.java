@@ -21,10 +21,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.parse.DeleteCallback;
@@ -56,6 +58,8 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
     protected byte[] picByteArray;
     protected Bitmap bmPic;
     protected Address address;
+    protected Switch phoneShareEdit;
+    protected Boolean shareSwitch;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -79,10 +83,26 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
         nameEdit = (EditText) findViewById(R.id.profile_name_edit);
         addressEdit = (EditText) findViewById(R.id.profile_address_edit);
         phoneEdit = (EditText)findViewById(R.id.profile_user_phone_edit);
+        phoneShareEdit = (Switch)findViewById(R.id.phone_switch_edit);
 
         nameEdit.setHint(currentUser.get("Name").toString());
         addressEdit.setHint(Utils.addressToString(currentUser.getJSONArray("address")));
         phoneEdit.setHint(currentUser.get("Phone").toString());
+        phoneShareEdit.setChecked((Boolean) currentUser.get("sharePhone"));
+
+        phoneShareEdit.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                if(isChecked)
+                {
+                    shareSwitch = true;
+                }
+                else
+                {
+                    shareSwitch = false;
+                }
+            }
+        });
 
         resetPassword = (Button) findViewById(R.id.reset_password_button);
         saveChangesB = (Button) findViewById(R.id.save_changes_button);
@@ -216,6 +236,8 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
                     Log.d("My Loggggg", "phone changed");
                     currentUser.put("Phone", phoneEdit.getText().toString());
                 }
+
+                currentUser.put("sharePhone",shareSwitch);
 
                 //if the new user took a profile picture - save it to parse data base
                 if (picByteArray != null)
