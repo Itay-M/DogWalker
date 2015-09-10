@@ -46,11 +46,20 @@ public class ProfileView extends BaseActivity implements View.OnClickListener
     {
         ParseUser currentUser = ParseUser.getCurrentUser();
 
+        boolean isShared = (boolean) currentUser.get("sharePhone");
+
         name.setText("Name: " + currentUser.get("Name").toString());
         userName.setText("UserName: " + currentUser.getUsername().toString());
         userCity.setText("Address: " + Utils.addressToString(currentUser.getJSONArray("address"), ",\n"));
-        userPhone.setText("Phone: " + currentUser.get("Phone").toString());
-        userSharePhone.setText("Share phone number: " + currentUser.get("sharePhone"));
+
+        if (isShared)
+        {
+            userPhone.setText("Phone: " + currentUser.get("Phone").toString());
+        }
+        else
+        {
+            userPhone.setText("Phone: Hidden");
+        }
 
         ParseFile p = currentUser.getParseFile("Photo");
         try
