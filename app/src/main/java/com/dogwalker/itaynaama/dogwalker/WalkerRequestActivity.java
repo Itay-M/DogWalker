@@ -62,14 +62,14 @@ public class WalkerRequestActivity extends BaseActivity {
         // update request that is open
         ParseObject request = ParseObject.createWithoutData("Requests",requestId);
 
-        if(ParseUser.getCurrentUser().equals(userRequested.getObjectId())) {
+        if(ParseUser.getCurrentUser().getObjectId().equals(userRequested.getObjectId())) {
             request.put("isRead", true);
             request.saveInBackground(new SaveCallback() {
                 public void done(ParseException e) {
                     if (e == null) {
                         // Saved successfully.
                     } else {
-                        // The save failed.
+                        Log.e("WalkerRequestActivity","Failed updating request read status: "+e.getMessage());
                     }
                 }
             });

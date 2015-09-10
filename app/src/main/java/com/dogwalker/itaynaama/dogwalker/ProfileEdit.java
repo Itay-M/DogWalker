@@ -241,11 +241,13 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
                     Integer id = (Integer)availabilityAdapter.getItem(i).getTag();
                     AvailabilityRecord record = availabilityAdapter.getItem(i);
                     if(id != null){
+                        // update if need old records
                         ParseObject userAvailability = userAvailabilitiesList.get(id);
                         userAvailabilitiesList.set(id,null);
                         record.toParseObject(userAvailability);
                         userAvailability.saveInBackground();
                     }else{
+                        // else is a new record
                         ParseObject newUserAvailability = record.toParseObject();
                         newUserAvailability.put("user",currentUser);
                         newUserAvailability.saveInBackground();

@@ -22,6 +22,7 @@ import com.parse.ParseInstallation;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.parse.ParseException;
@@ -36,9 +37,10 @@ import java.util.List;
 public class MainActivity extends BaseActivity implements View.OnClickListener
 {
     protected Button theSearchButton;
-    protected ImageView profilePicFromParse;
     protected ListView walkerRequestsList;
     protected ListView myRequestsList;
+    protected ProgressBar walkingReqsLoading;
+    protected ProgressBar myReqsLoading;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -46,11 +48,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //imageView
-        profilePicFromParse = (ImageView)findViewById(R.id.profilePic);
-
         //button setup
         theSearchButton = (Button) findViewById(R.id.searchButton);
+
+        // data state
+        walkingReqsLoading = (ProgressBar)findViewById(R.id.main_walker_reqs_loading);
+        myReqsLoading = (ProgressBar)findViewById(R.id.main_my_reqs_loading);
 
         // walker requests list
         walkerRequestsList = (ListView)findViewById(R.id.main_walker_requests_list);
@@ -94,6 +97,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
      * take all request that send to user
      */
     protected void retrieveWalkerRequests(){
+        walkingReqsLoading.setVisibility(View.VISIBLE);
+        walkerRequestsList.setVisibility(View.GONE);
+
         ParseQuery<ParseObject> requestsQuery = new ParseQuery<>("Requests");
         requestsQuery.whereEqualTo("to",ParseUser.getCurrentUser());
         requestsQuery.include("from");
@@ -108,14 +114,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
                 }else{
                     Log.e("MainActivity",e.getMessage());
                 }
+                walkerRequestsList.setVisibility(View.VISIBLE);
+                walkingReqsLoading.setVisibility(View.GONE);
             }
         });
+
     }
 
     /**
      * take all request that send from user
      */
     protected void retrieveMyRequests(){
+        myReqsLoading.setVisibility(View.VISIBLE);
+        myRequestsList.setVisibility(View.GONE);
+
         ParseQuery<ParseObject> requestsQuery = new ParseQuery<>("Requests");
         requestsQuery.whereEqualTo("from",ParseUser.getCurrentUser());
         requestsQuery.include("to");
@@ -130,6 +142,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
                 }else{
                     Log.e("MainActivity",e.getMessage());
                 }
+                myRequestsList.setVisibility(View.VISIBLE);
+                myReqsLoading.setVisibility(View.GONE);
             }
         });
     }
@@ -166,7 +180,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
     /**
      * Check if there is a current user logged in.
      * yes - handle the current user and puts it's name in the action bar.
-     * No - go to OpeningActivity for login or register.
+     * No - go to LoginActivity for login or register.
      */
 
     private void currentUserHandle()
@@ -178,9 +192,9 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         if (!currentUserExists || (ParseUser.getCurrentUser() == null))
         {
             Log.d("My Loggggg", "there is no current user, referring to login or register activity...");
-            Intent i = new Intent(this, OpeningActivity.class);
+            Intent i = new Intent(this, Login.class);
             startActivity(i);
-        }
+        }/*
         else
         {
             // connect between installation app to login user
@@ -194,25 +208,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
             Log.d("My Loggggg", "user exists and logged in");
             Log.d("My Loggggg", "the username that logged in is - " + currentUser.getUsername());
 
-            //show profile picture in the imageView
-
-            try
-            {
-                Log.d("My Loggggg", "in");
-                ParseFile p = currentUser.getParseFile("Photo");
-                if(p != null) {
-                    Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
-                    profilePicFromParse.setImageBitmap(b);
-                }else{
-                    profilePicFromParse.setImageResource(R.drawable.logo);
-                }
-            }
-            catch (ParseException e)
-            {
-                Log.d("My Loggggg", e.getMessage().toString());
-                Log.d("My Loggggg", currentUser.getUsername());
-                            }
-        }
+        }*/
     }
 
     /**

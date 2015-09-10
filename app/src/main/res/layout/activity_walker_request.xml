@@ -24,7 +24,7 @@
             android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
             android:layout_alignParentEnd="true"
-            android:src="@android:drawable/ic_menu_gallery" />
+            android:src="@drawable/logo_transparent" />
 
         <LinearLayout
             android:orientation="vertical"

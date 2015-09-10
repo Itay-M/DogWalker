@@ -37,6 +37,7 @@ public class UserSelectionListAdapter extends ArrayAdapter<WalkerSearchActivity.
         TextView address = (TextView)row.findViewById(R.id.result_row_distance);
         ImageView photo = (ImageView)row.findViewById(R.id.result_row_photo);
         TextView age = (TextView)row.findViewById(R.id.result_row_age);
+        TextView phone = (TextView)row.findViewById(R.id.result_row_phone);
 
         username.setText(user.getUsername());
 
@@ -53,6 +54,16 @@ public class UserSelectionListAdapter extends ArrayAdapter<WalkerSearchActivity.
 
         // show age of user
         age.setText((((int)(user.getAge()*10))/10.0)+" years old");
+
+        //show phone of user if his want to expose it
+        if(user.isSharePhone()){
+            phone.setText(user.getPhone());
+        }else{
+            phone.setText("");
+        }
+
         return row;
+
+
     }
 }

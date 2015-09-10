@@ -15,24 +15,38 @@
                   tools:context="com.dogwalker.itaynaama.dogwalker.ProfileEdit"
         android:background="#ffffff">
 
-        <ImageView
-            android:id="@+id/view_curr_pic"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@drawable/logo_transparent" />
-
-        <Button
-            android:id="@+id/change_pic_button"
-            android:text="change profile picture"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="match_parent"
+            android:layout_marginBottom="20dp">
+
+            <ImageView
+                android:id="@+id/view_curr_pic"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/logo_transparent"
+                android:layout_marginRight="30dp" />
+
+            <Button
+                android:id="@+id/change_pic_button"
+                android:text="change profile picture"
+                android:layout_width="150dp"
+                android:layout_height="wrap_content"
+                android:longClickable="false"
+                android:nestedScrollingEnabled="false"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:background="#ffffff" />
+
+        </LinearLayout>
 
         <EditText
             android:id="@+id/profile_name_edit"
             android:imeOptions="actionNext"
             android:singleLine="true"
-            android:textColor="@android:color/holo_green_light"
-            android:textSize="30dp"
+            android:textColor="@color/base_app_color"
+            android:textSize="20dp"
             android:textStyle="italic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -45,8 +59,8 @@
 
             <EditText
                 android:id="@+id/profile_address_edit"
-                android:textColor="@android:color/holo_green_light"
-                android:textSize="30dp"
+                android:textColor="@color/base_app_color"
+                android:textSize="20dp"
                 android:textStyle="italic"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -63,12 +77,25 @@
 
         <EditText
             android:id="@+id/profile_user_phone_edit"
-            android:textColor="@android:color/holo_green_light"
-            android:textSize="30dp"
+            android:textColor="@color/base_app_color"
+            android:textSize="20dp"
             android:textStyle="italic"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Phone edit" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Walking Availability"
+            android:id="@+id/textView4"
+            android:layout_gravity="center_horizontal"
+            android:background="#646464"
+            android:textColor="@android:color/white"
+            android:padding="4dp"
+            android:textStyle="bold"
+            android:textSize="15sp"
+            android:layout_marginTop="10dp" />
 
         <LinearLayout
             android:orientation="vertical"
@@ -81,7 +108,8 @@
             android:id="@+id/reset_mail_question"
             android:text="reset password"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" />
 
         <Button
             android:id="@+id/reset_password_button"

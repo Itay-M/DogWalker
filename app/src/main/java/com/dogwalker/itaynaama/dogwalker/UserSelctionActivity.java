@@ -8,10 +8,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-
 import com.parse.ParseGeoPoint;
-import com.parse.ParseQuery;
-import com.parse.ParseUser;
+
 
 import java.util.ArrayList;
 
@@ -23,7 +21,7 @@ public class UserSelctionActivity extends AppCompatActivity implements AdapterVi
         setContentView(R.layout.activity_user_selction);
 
         ListView usersList = (ListView)findViewById(R.id.user_selection_list);
-        ArrayList<WalkerSearchActivity.ParseUserInfo> users = (ArrayList)getIntent().getSerializableExtra("users");
+        ArrayList<WalkerSearchActivity.ParseUserInfo> users = (ArrayList<WalkerSearchActivity.ParseUserInfo>)getIntent().getSerializableExtra("users");
 
         ParseGeoPoint pickupLocation = new ParseGeoPoint(getIntent().getDoubleExtra("addressLocationLat",0),getIntent().getDoubleExtra("addressLocationLng",0));
 

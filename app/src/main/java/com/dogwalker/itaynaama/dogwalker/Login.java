@@ -11,6 +11,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.parse.LogInCallback;
 import com.parse.Parse;
@@ -23,10 +24,11 @@ import com.parse.RequestPasswordResetCallback;
 public class Login extends AppCompatActivity implements View.OnClickListener
 {
 
-    Button loginB;
-    Button forgotPassB;
-    EditText usernameET;
-    EditText passwordET;
+    protected Button loginB;
+    protected TextView forgotPassB;
+    protected TextView registerB;
+    protected EditText usernameET;
+    protected EditText passwordET;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -36,14 +38,21 @@ public class Login extends AppCompatActivity implements View.OnClickListener
 
         //reference the login button from the activity to this button.
         loginB = (Button) findViewById(R.id.loginButton);
-        //reference the forgot password button from the activity to this button.
-        forgotPassB = (Button) findViewById(R.id.forgotPasswordButton);
+
+        //reference the forgot password button from the activity to this text view.
+        forgotPassB = (TextView) findViewById(R.id.forgotPasswordButton);
+
+        //reference the register button from the activity to this text view.
+        registerB = (TextView)findViewById(R.id.login_register_button);
+
         //reference the user button from the activity to this button.
         usernameET = (EditText)findViewById(R.id.usernameEditText);
+
         //reference the login button from the activity to this button.
         passwordET = (EditText)findViewById(R.id.passwordEditText);
 
         loginB.setOnClickListener(this);
+        registerB.setOnClickListener(this);
         forgotPassB.setOnClickListener(this);
 
         //set the "GO" button in the keyboard to alternatively press the register button
@@ -107,7 +116,7 @@ public class Login extends AppCompatActivity implements View.OnClickListener
                             public void onClick(DialogInterface dialog, int which)
                             {
                                 //send the reset to the mail, if not successful print exception.
-                                ParseUser.requestPasswordResetInBackground(input.getText().toString(), new RequestPasswordResetCallback()
+                                ParseUser.requestPasswordResetInBackground(input.getText().toString().toLowerCase(), new RequestPasswordResetCallback()
                                 {
                                     @Override
                                     public void done(ParseException e)
@@ -133,6 +142,14 @@ public class Login extends AppCompatActivity implements View.OnClickListener
                         });
                 alertBuilder.setView(input);
                 alertBuilder.show();
+
+                break;
+
+            case R.id.login_register_button:
+                Intent regIntent = new Intent(this, Register.class);
+                startActivity(regIntent);
+
+                break;
         }
     }
 

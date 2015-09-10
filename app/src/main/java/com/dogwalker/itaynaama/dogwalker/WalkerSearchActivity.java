@@ -116,49 +116,59 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
         searchWalker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ParseGeoPoint addressGeoPoint = new ParseGeoPoint();
-                addressGeoPoint.setLatitude(address.getLatitude());
-                addressGeoPoint.setLongitude(address.getLongitude());
 
-                ParseQuery<ParseUser> usersQuery = new ParseQuery<ParseUser>(ParseUser.class);
-                usersQuery.whereWithinKilometers("addressLocation", addressGeoPoint, 20);
+                //check that choose time not pass
+                date.set(Calendar.HOUR_OF_DAY,time/60);
+                date.set(Calendar.MINUTE,time%60);
+                if (date.compareTo(Calendar.getInstance()) <= 0) {
+                     Utils.showMessageBox(WalkerSearchActivity.this,"time not right","Please choose time in future");
+                } else {
+                    ParseGeoPoint addressGeoPoint = new ParseGeoPoint();
+                    addressGeoPoint.setLatitude(address.getLatitude());
+                    addressGeoPoint.setLongitude(address.getLongitude());
 
-                // found walkers that can according to criterion
-                ParseQuery<ParseObject> availabilityQuery = new ParseQuery("UserAvailability");
-                //availabilityQuery.whereEqualTo("dayOfWeek", datePickerFragment.getDate().get(Calendar.DAY_OF_WEEK));
-                availabilityQuery.whereContainsAll("days", Collections.singleton(datePickerFragment.getDate().get(Calendar.DAY_OF_WEEK)));
-                availabilityQuery.whereLessThanOrEqualTo("startTime", time);
-                availabilityQuery.whereGreaterThanOrEqualTo("endTime", time);
-                availabilityQuery.selectKeys(Arrays.asList("user"));
-                availabilityQuery.whereMatchesKeyInQuery("user", "objectId", usersQuery);
-                availabilityQuery.include("user");
+                    ParseQuery<ParseUser> usersQuery = new ParseQuery<ParseUser>(ParseUser.class);
+                    usersQuery.whereWithinKilometers("addressLocation", addressGeoPoint, 20);
 
-                // retrieval all users from DB
-                availabilityQuery.findInBackground(new FindCallback<ParseObject>() {
-                    public void done(List<ParseObject> usersAvailability, ParseException e) {
-                        if (e == null) {
-                            ArrayList<ParseUserInfo> users = new ArrayList<>();
-                            for (final ParseObject userAvailability : usersAvailability) {
-                                ParseUser user = userAvailability.getParseUser("user");
-                                users.add(new ParseUserInfo(user));
+                    // found walkers that can according to criterion
+                    ParseQuery<ParseObject> availabilityQuery = new ParseQuery("UserAvailability");
+                    //availabilityQuery.whereEqualTo("dayOfWeek", datePickerFragment.getDate().get(Calendar.DAY_OF_WEEK));
+                    availabilityQuery.whereContainsAll("days", Collections.singleton(datePickerFragment.getDate().get(Calendar.DAY_OF_WEEK)));
+                    availabilityQuery.whereLessThanOrEqualTo("startTime", time);
+                    availabilityQuery.whereGreaterThanOrEqualTo("endTime", time);
+                    availabilityQuery.selectKeys(Arrays.asList("user"));
+                    availabilityQuery.whereMatchesKeyInQuery("user", "objectId", usersQuery);
+                    availabilityQuery.include("user");
+                    availabilityQuery.whereNotEqualTo("user",ParseUser.getCurrentUser());
+
+                    // retrieval all users from DB
+                    availabilityQuery.findInBackground(new FindCallback<ParseObject>() {
+                        public void done(List<ParseObject> usersAvailability, ParseException e) {
+                            if (e == null) {
+                                ArrayList<ParseUserInfo> users = new ArrayList<>();
+                                for (final ParseObject userAvailability : usersAvailability) {
+                                    ParseUser user = userAvailability.getParseUser("user");
+                                    users.add(new ParseUserInfo(user));
+                                }
+                                Intent usersSelectionIntent = new Intent(WalkerSearchActivity.this, UserSelctionActivity.class);
+                                usersSelectionIntent.putExtra("users", users);
+
+                                // send details of pickup address
+                                usersSelectionIntent.putExtra("addressLocationLng", address.getLongitude());
+                                usersSelectionIntent.putExtra("addressLocationLat", address.getLatitude());
+
+                                startActivityForResult(usersSelectionIntent, REQUEST_USER);
+                            } else {
+                                Log.d("users", "Error: " + e.getMessage());
                             }
-                            Intent usersSelectionIntent = new Intent(WalkerSearchActivity.this, UserSelctionActivity.class);
-                            usersSelectionIntent.putExtra("users", users);
-
-                            // send details of pickup address
-                            usersSelectionIntent.putExtra("addressLocationLng",address.getLongitude());
-                            usersSelectionIntent.putExtra("addressLocationLat", address.getLatitude());
-
-                            startActivityForResult(usersSelectionIntent, REQUEST_USER);
-                        } else {
-                            Log.d("users", "Error: " + e.getMessage());
                         }
-                    }
-                });
+                    });
 
+                }
             }
         });
     }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -249,6 +259,8 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
         private String username;
         private String address;
         private String objectId;
+        private String phone;
+        private boolean sharePhone;
         private Date bornDate;
         private byte[] profilePicture;
         private double addressLocationLat;
@@ -259,6 +271,8 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
         public ParseUserInfo(ParseUser user){
             username = user.getUsername();
             address = user.getString("address");
+            phone = user.getString("Phone");
+            sharePhone = user.getBoolean("sharePhone");
             objectId = user.getObjectId();
             bornDate = user.getDate("bornDate");
             ParseGeoPoint addressLocation = user.getParseGeoPoint("addressLocation");
@@ -306,6 +320,14 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
             age = (todayInMillis-bornInMillis)/1000.0/60/60/24/365;
 
             return age;
+        }
+
+        public String getPhone() {
+            return phone;
+        }
+
+        public boolean isSharePhone() {
+            return sharePhone;
         }
     }
 }

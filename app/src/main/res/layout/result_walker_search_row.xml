@@ -5,47 +5,68 @@
     android:descendantFocusability="blocksDescendants"
     android:background="#ffffff"
     android:paddingBottom="5dp">
+
     <LinearLayout
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/linearLayout">
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Username"
-            android:id="@+id/result_row_username"
-            android:textSize="25dp"
-            android:layout_marginLeft="5dp" />
+        android:layout_alignParentEnd="false">
 
-        <TextView
-            android:layout_width="fill_parent"
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="distance"
-            android:id="@+id/result_row_distance"
-            android:textSize="18dp"
-            android:layout_marginLeft="5dp"
-            android:singleLine="false" />
+            android:id="@+id/linearLayout"
+            android:layout_weight="1">
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Username"
+                android:id="@+id/result_row_username"
+                android:textSize="25dp"
+                android:layout_marginLeft="5dp" />
 
-        <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="age"
-            android:id="@+id/result_row_age"
-            android:textSize="18dp"
-            android:layout_marginLeft="5dp"
-            android:singleLine="false" />
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="distance"
+                android:id="@+id/result_row_distance"
+                android:textSize="18dp"
+                android:layout_marginLeft="5dp"
+                android:singleLine="false" />
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceSmall"
+                android:text="age"
+                android:id="@+id/result_row_age"
+                android:textSize="18dp"
+                android:layout_marginLeft="5dp"
+                android:singleLine="false" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="phone"
+                android:id="@+id/result_row_phone"
+                android:layout_alignBottom="@+id/result_row_photo"
+                android:layout_toRightOf="@+id/linearLayout"
+                android:layout_toEndOf="@+id/linearLayout"
+                android:textSize="18dp"
+                android:layout_marginLeft="5dp" />
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:id="@+id/result_row_photo"
+            android:layout_centerVertical="true"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/logo_transparent" />
     </LinearLayout>
 
-    <ImageView
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:id="@+id/result_row_photo"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true"
-        android:src="@drawable/logo_transparent" />
 </RelativeLayout>

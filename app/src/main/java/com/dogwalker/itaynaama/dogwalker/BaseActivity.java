@@ -84,7 +84,7 @@ public class BaseActivity extends AppCompatActivity
         installation.remove("user");
         installation.saveEventually();
 
-        Intent i = new Intent(this, OpeningActivity.class);
+        Intent i = new Intent(this, Login.class);
         startActivity(i);
     }
 

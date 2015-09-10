@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="base_app_color">#79103fff</color>
+    <color name="base_app_color">#FF43ABDA</color>
     <color name="request_not_read">#63EFFFA6</color>
 </resources>
