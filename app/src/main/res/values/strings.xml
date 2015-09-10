@@ -33,4 +33,5 @@
     <string name="walker_request_name">Name</string>
     <string name="walker_requset_time">time</string>
     <string name="current_location_hint">(Current Location)</string>
+    <string name="requests_not_found">No requests found</string>
 </resources>

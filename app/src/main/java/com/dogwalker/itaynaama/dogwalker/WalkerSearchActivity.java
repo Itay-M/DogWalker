@@ -1,33 +1,14 @@
 package com.dogwalker.itaynaama.dogwalker;
 
-import android.app.AlertDialog;
-import android.app.DatePickerDialog;
-import android.app.Dialog;
-
-import android.app.TimePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Address;
-import android.location.Location;
-import android.support.v4.app.DialogFragment;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.DatePicker;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.TimePicker;
 
-import com.google.android.gms.location.places.ui.PlacePicker;
 import com.parse.FindCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
@@ -39,17 +20,13 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 import com.parse.SendCallback;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.Serializable;
-import java.sql.Time;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -150,7 +127,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                                     ParseUser user = userAvailability.getParseUser("user");
                                     users.add(new ParseUserInfo(user));
                                 }
-                                Intent usersSelectionIntent = new Intent(WalkerSearchActivity.this, UserSelctionActivity.class);
+                                Intent usersSelectionIntent = new Intent(WalkerSearchActivity.this, UserSelectionActivity.class);
                                 usersSelectionIntent.putExtra("users", users);
 
                                 // send details of pickup address

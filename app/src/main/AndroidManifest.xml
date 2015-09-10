@@ -76,7 +76,7 @@
             android:label="@string/title_activity_profile_view" >
         </activity>
         <activity
-            android:name=".UserSelctionActivity"
+            android:name=".UserSelectionActivity"
             android:label="@string/title_activity_user_selction" >
         </activity>
         <activity

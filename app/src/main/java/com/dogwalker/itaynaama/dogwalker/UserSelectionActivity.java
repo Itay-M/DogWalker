@@ -13,7 +13,7 @@ import com.parse.ParseGeoPoint;
 
 import java.util.ArrayList;
 
-public class UserSelctionActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
+public class UserSelectionActivity extends AppCompatActivity implements AdapterView.OnItemClickListener{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
