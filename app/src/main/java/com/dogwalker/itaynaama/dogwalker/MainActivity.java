@@ -41,6 +41,8 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
     protected ListView myRequestsList;
     protected ProgressBar walkingReqsLoading;
     protected ProgressBar myReqsLoading;
+    protected TextView walkerReqsNotFound;
+    protected TextView myReqsNotFound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -51,9 +53,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         //button setup
         theSearchButton = (Button) findViewById(R.id.searchButton);
 
-        // data state
+        // requests lists loaders
         walkingReqsLoading = (ProgressBar)findViewById(R.id.main_walker_reqs_loading);
         myReqsLoading = (ProgressBar)findViewById(R.id.main_my_reqs_loading);
+        // requests lists not found text views
+        walkerReqsNotFound = (TextView)findViewById(R.id.main_walker_reqs_not_found);
+        myReqsNotFound = (TextView)findViewById(R.id.main_my_reqs_not_found);
 
         // walker requests list
         walkerRequestsList = (ListView)findViewById(R.id.main_walker_requests_list);
@@ -99,6 +104,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
     protected void retrieveWalkerRequests(){
         walkingReqsLoading.setVisibility(View.VISIBLE);
         walkerRequestsList.setVisibility(View.GONE);
+        walkerReqsNotFound.setVisibility(View.GONE);
 
         ParseQuery<ParseObject> requestsQuery = new ParseQuery<>("Requests");
         requestsQuery.whereEqualTo("to",ParseUser.getCurrentUser());
@@ -114,7 +120,14 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
                 }else{
                     Log.e("MainActivity",e.getMessage());
                 }
-                walkerRequestsList.setVisibility(View.VISIBLE);
+
+                if(e!=null || requests.isEmpty()){
+                    walkerReqsNotFound.setVisibility(View.VISIBLE);
+                    walkerRequestsList.setVisibility(View.GONE);
+                }else {
+                    walkerReqsNotFound.setVisibility(View.GONE);
+                    walkerRequestsList.setVisibility(View.VISIBLE);
+                }
                 walkingReqsLoading.setVisibility(View.GONE);
             }
         });
@@ -127,6 +140,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
     protected void retrieveMyRequests(){
         myReqsLoading.setVisibility(View.VISIBLE);
         myRequestsList.setVisibility(View.GONE);
+        myReqsNotFound.setVisibility(View.GONE);
 
         ParseQuery<ParseObject> requestsQuery = new ParseQuery<>("Requests");
         requestsQuery.whereEqualTo("from",ParseUser.getCurrentUser());
@@ -142,7 +156,13 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
                 }else{
                     Log.e("MainActivity",e.getMessage());
                 }
-                myRequestsList.setVisibility(View.VISIBLE);
+                if(e!=null || requests.isEmpty()){
+                    myReqsNotFound.setVisibility(View.VISIBLE);
+                    myRequestsList.setVisibility(View.GONE);
+                }else {
+                    myReqsNotFound.setVisibility(View.GONE);
+                    myRequestsList.setVisibility(View.VISIBLE);
+                }
                 myReqsLoading.setVisibility(View.GONE);
             }
         });
