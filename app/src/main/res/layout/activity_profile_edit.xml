@@ -84,6 +84,13 @@
             android:layout_height="wrap_content"
             android:hint="Phone edit" />
 
+        <Switch
+            android:id="@+id/phone_switch_edit"
+            android:text="Share number with other users?"
+            android:padding="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

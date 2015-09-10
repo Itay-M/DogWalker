@@ -31,7 +31,7 @@ import java.util.List;
 public class ProfileView extends BaseActivity implements View.OnClickListener
 {
     protected ImageView viewPic;
-    protected TextView name, userName, userCity, userPhone;
+    protected TextView name, userName, userCity, userPhone, userSharePhone;
     protected Button editButton;
     protected UserAvailabilityAdapter availabilityAdapter;
 
@@ -47,6 +47,7 @@ public class ProfileView extends BaseActivity implements View.OnClickListener
         userName = (TextView) findViewById(R.id.profile_user_name);
         userCity = (TextView) findViewById(R.id.profile_user_city);
         userPhone = (TextView)findViewById(R.id.profile_user_phone);
+        userSharePhone = (TextView)findViewById(R.id.profile_user_sharePhone);
 
         editButton.setOnClickListener(this);
 
@@ -60,10 +61,20 @@ public class ProfileView extends BaseActivity implements View.OnClickListener
     {
         ParseUser currentUser = ParseUser.getCurrentUser();
 
+        boolean isShared = (boolean) currentUser.get("sharePhone");
+
         name.setText("Name: " + currentUser.get("Name").toString());
         userName.setText("UserName: " + currentUser.getUsername().toString());
         userCity.setText("Address: " + Utils.addressToString(currentUser.getJSONArray("address"), ",\n"));
-        userPhone.setText("Phone: " + currentUser.get("Phone").toString());
+
+        if (isShared)
+        {
+            userPhone.setText("Phone: " + currentUser.get("Phone").toString());
+        }
+        else
+        {
+            userPhone.setText("Phone: Hidden");
+        }
 
         // user availability
         final GridLayout availbilityItems = (GridLayout)findViewById(R.id.view_availability_items);
