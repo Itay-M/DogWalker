@@ -34,4 +34,6 @@
     <string name="walker_requset_time">time</string>
     <string name="current_location_hint">(Current Location)</string>
     <string name="requests_not_found">No requests found</string>
+
+    <string name="unknown_error_occur">An unknown error has occur. Please try again later.</string>
 </resources>

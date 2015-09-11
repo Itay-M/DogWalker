@@ -93,14 +93,7 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
         phoneShareEdit.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                if(isChecked)
-                {
-                    shareSwitch = true;
-                }
-                else
-                {
-                    shareSwitch = false;
-                }
+                shareSwitch = isChecked;
             }
         });
 

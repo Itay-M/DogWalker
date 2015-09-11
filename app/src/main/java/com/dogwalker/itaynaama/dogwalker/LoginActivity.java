@@ -2,10 +2,7 @@ package com.dogwalker.itaynaama.dogwalker;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -14,21 +11,30 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.parse.LogInCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
 import com.parse.ParseUser;
 import com.parse.RequestPasswordResetCallback;
 
-
-public class Login extends AppCompatActivity implements View.OnClickListener
+/**
+ * Login activity - allow the user to sign in into the application by providing his username
+ * and password. In addition the user can reset his password or go to the register activity if he
+ * isn't registered yet.
+ */
+public class LoginActivity extends BaseActivity implements View.OnClickListener
 {
-
-    protected Button loginB;
-    protected TextView forgotPassB;
-    protected TextView registerB;
+    /**
+     * Username EditText field
+     */
     protected EditText usernameET;
+    /**
+     * Password EditText field
+     */
     protected EditText passwordET;
+
+    public LoginActivity(){
+        super(true);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -37,13 +43,13 @@ public class Login extends AppCompatActivity implements View.OnClickListener
         setContentView(R.layout.activity_login);
 
         //reference the login button from the activity to this button.
-        loginB = (Button) findViewById(R.id.loginButton);
+        final Button loginB = (Button) findViewById(R.id.loginButton);
 
         //reference the forgot password button from the activity to this text view.
-        forgotPassB = (TextView) findViewById(R.id.forgotPasswordButton);
+        TextView forgotPassB = (TextView) findViewById(R.id.forgotPasswordButton);
 
         //reference the register button from the activity to this text view.
-        registerB = (TextView)findViewById(R.id.login_register_button);
+        TextView registerB = (TextView)findViewById(R.id.login_register_button);
 
         //reference the user button from the activity to this button.
         usernameET = (EditText)findViewById(R.id.usernameEditText);
@@ -81,23 +87,19 @@ public class Login extends AppCompatActivity implements View.OnClickListener
                     @Override
                     public void done(ParseUser parseUser, ParseException e)
                     {
-                        if (e == null)
-                        {
-                            saveLoginPref();
-                            Toast.makeText(getApplicationContext(), "user logged in successfully", Toast.LENGTH_LONG).show();
+                        if (e == null){
+                            Toast.makeText(getApplicationContext(), "user logged in successfully", Toast.LENGTH_SHORT).show();
 
                             // connect between installation app to login user
                             ParseInstallation installation = ParseInstallation.getCurrentInstallation();
                             installation.put("user",ParseUser.getCurrentUser());
                             installation.saveEventually();
 
-                            Intent i = new Intent(Login.this, MainActivity.class);
+                            Intent i = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(i);
                             finish();
-                        }
-                        else
-                        {
-                            Toast.makeText(getApplicationContext(), "no such user exist", Toast.LENGTH_LONG).show();
+                        }else{
+                            Utils.showMessageBox(getApplicationContext(),"Login Failed","no such user exist");
                         }
                     }
                 });
@@ -110,58 +112,43 @@ public class Login extends AppCompatActivity implements View.OnClickListener
                 final EditText input = new EditText(this);
 
                 alertBuilder.setMessage("Do you want to reset your password \n(sending reset to your mail)")
-                        .setPositiveButton("Send reset", new DialogInterface.OnClickListener()
+                    .setPositiveButton("Send reset", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
                         {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which)
+                            //send the reset to the mail, if not successful print exception.
+                            ParseUser.requestPasswordResetInBackground(input.getText().toString().toLowerCase(), new RequestPasswordResetCallback()
                             {
-                                //send the reset to the mail, if not successful print exception.
-                                ParseUser.requestPasswordResetInBackground(input.getText().toString().toLowerCase(), new RequestPasswordResetCallback()
+                                @Override
+                                public void done(ParseException e)
                                 {
-                                    @Override
-                                    public void done(ParseException e)
-                                    {
-                                        if (e == null)
-                                        {
-                                            Toast.makeText(getApplicationContext(), "reset sent successfully to your email", Toast.LENGTH_LONG).show();
-                                        }
-                                        else
-                                        {
-                                            Log.d("My Loggggg", e.getMessage());
-                                            Toast.makeText(getApplicationContext(), "error" + e.getMessage(), Toast.LENGTH_LONG).show();
-                                        }
-                                    }
-                                });
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Log.d("My Loggggg", "user canceled reset");
-                            }
-                        });
+                                if (e == null) {
+                                    Toast.makeText(getApplicationContext(), "reset sent successfully to your email", Toast.LENGTH_LONG).show();
+                                } else {
+                                    Log.d("Login", "Reset password failed "+e.getMessage());
+                                    Utils.showMessageBox(getApplicationContext(),"Reset Password Failed",getString(R.string.unknown_error_occur));
+                                }
+                                }
+                            });
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Log.d("My Loggggg", "user canceled reset");
+                        }
+                    });
                 alertBuilder.setView(input);
                 alertBuilder.show();
 
                 break;
 
             case R.id.login_register_button:
-                Intent regIntent = new Intent(this, Register.class);
+                Intent regIntent = new Intent(this, RegisterActivity.class);
                 startActivity(regIntent);
 
                 break;
         }
     }
-
-
-    /**
-     * save the status of current user exists to SharedPreferences.
-     */
-    private void saveLoginPref()
-    {
-        SharedPreferences loginPref = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = loginPref.edit();
-        editor.putBoolean("USEREXISTS",true).commit();
-    }
-
 }

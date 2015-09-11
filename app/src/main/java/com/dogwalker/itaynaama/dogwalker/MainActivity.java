@@ -1,48 +1,64 @@
 package com.dogwalker.itaynaama.dogwalker;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.location.LocationManager;
-import android.media.MediaActionSound;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 
 import com.parse.FindCallback;
-import com.parse.ParseInstallation;
-import android.widget.ImageView;
+
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.parse.ParseException;
-import com.parse.ParseFile;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import java.util.List;
 
-
-public class MainActivity extends BaseActivity implements View.OnClickListener
+/**
+ * The main screen activity - displaying the user his walking requests as well as requests he has
+ * sent to other users and an option to search for a walker.
+ */
+public class MainActivity extends BaseActivity implements View.OnClickListener,AdapterView.OnItemClickListener
 {
-    protected Button theSearchButton;
+    /**
+     * ListView displaying all the walking requests sent to the current user
+     */
     protected ListView walkerRequestsList;
+    /**
+     * ListView dispaying all the requests sent by the current user to other users
+     */
     protected ListView myRequestsList;
+    /**
+     * Loading indicator for the walking requests list
+     */
     protected ProgressBar walkingReqsLoading;
+    /**
+     * Loading indicator for the current user requests list
+     */
     protected ProgressBar myReqsLoading;
+    /**
+     * TextView displaying "not found" message when no walking requests has found
+     */
     protected TextView walkerReqsNotFound;
+    /**
+     * TextView displaying "not found" message when no current user requests has found
+     */
     protected TextView myReqsNotFound;
+
+    public MainActivity(){
+        super(true);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -50,42 +66,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //button setup
-        theSearchButton = (Button) findViewById(R.id.searchButton);
-
-        // requests lists loaders
+        // search for a walker button
+        Button theSearchButton = (Button) findViewById(R.id.searchButton);
+        // requests lists loader indicators
         walkingReqsLoading = (ProgressBar)findViewById(R.id.main_walker_reqs_loading);
         myReqsLoading = (ProgressBar)findViewById(R.id.main_my_reqs_loading);
         // requests lists not found text views
         walkerReqsNotFound = (TextView)findViewById(R.id.main_walker_reqs_not_found);
         myReqsNotFound = (TextView)findViewById(R.id.main_my_reqs_not_found);
-
-        // walker requests list
+        // requests lists
         walkerRequestsList = (ListView)findViewById(R.id.main_walker_requests_list);
-
-        walkerRequestsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ParseObject request = (ParseObject)parent.getAdapter().getItem(position);
-                Intent i = WalkerRequestActivity.prepareIntent(MainActivity.this, request);
-                startActivity(i);
-            }
-        });
-
-        // my request list
         myRequestsList =(ListView)findViewById(R.id.main_my_request_list);
 
-        myRequestsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                ParseObject myReq = (ParseObject)parent.getAdapter().getItem(position);
-                Intent i = WalkerRequestActivity.prepareIntent(MainActivity.this, myReq);
-                startActivity(i);
-            }
-        });
+        // handle request click
+        walkerRequestsList.setOnItemClickListener(this);
+        myRequestsList.setOnItemClickListener(this);
 
-        //hide the actionBar's back button
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        // handle search button
         theSearchButton.setOnClickListener(this);
 
         //check if there is a current user logged in
@@ -98,14 +95,23 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         retrieveMyRequests();
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        ParseObject request = (ParseObject)parent.getAdapter().getItem(position);
+        Intent i = WalkerRequestActivity.prepareIntent(MainActivity.this, request);
+        startActivity(i);
+    }
+
     /**
      * take all request that send to user
      */
     protected void retrieveWalkerRequests(){
+        // display loading indicator
         walkingReqsLoading.setVisibility(View.VISIBLE);
         walkerRequestsList.setVisibility(View.GONE);
         walkerReqsNotFound.setVisibility(View.GONE);
 
+        // perform search in background
         ParseQuery<ParseObject> requestsQuery = new ParseQuery<>("Requests");
         requestsQuery.whereEqualTo("to",ParseUser.getCurrentUser());
         requestsQuery.include("from");
@@ -114,20 +120,24 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         requestsQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> requests, ParseException e) {
-                if(e==null) {
+                // update list items
+                if (e == null) {
                     ListAdapter adapter = new WalkerRequestsListAdapter(MainActivity.this, requests, "from");
                     walkerRequestsList.setAdapter(adapter);
-                }else{
-                    Log.e("MainActivity",e.getMessage());
+                } else {
+                    Log.e("MainActivity", e.getMessage());
                 }
 
-                if(e!=null || requests.isEmpty()){
+                // display "no requests found" if needed
+                if (e != null || requests.isEmpty()) {
                     walkerReqsNotFound.setVisibility(View.VISIBLE);
                     walkerRequestsList.setVisibility(View.GONE);
-                }else {
+                } else {
                     walkerReqsNotFound.setVisibility(View.GONE);
                     walkerRequestsList.setVisibility(View.VISIBLE);
                 }
+
+                // hide loading indicator
                 walkingReqsLoading.setVisibility(View.GONE);
             }
         });
@@ -138,10 +148,12 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
      * take all request that send from user
      */
     protected void retrieveMyRequests(){
+        // display loading indicator
         myReqsLoading.setVisibility(View.VISIBLE);
         myRequestsList.setVisibility(View.GONE);
         myReqsNotFound.setVisibility(View.GONE);
 
+        // perform search in background
         ParseQuery<ParseObject> requestsQuery = new ParseQuery<>("Requests");
         requestsQuery.whereEqualTo("from",ParseUser.getCurrentUser());
         requestsQuery.include("to");
@@ -150,32 +162,36 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         requestsQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> requests, ParseException e) {
-                if(e==null) {
+                // update list items
+                if (e == null) {
                     ListAdapter adapter = new WalkerRequestsListAdapter(MainActivity.this, requests, "to");
                     myRequestsList.setAdapter(adapter);
-                }else{
-                    Log.e("MainActivity",e.getMessage());
+                } else {
+                    Log.e("MainActivity", e.getMessage());
                 }
-                if(e!=null || requests.isEmpty()){
+
+                // display "no requests found" if needed
+                if (e != null || requests.isEmpty()) {
                     myReqsNotFound.setVisibility(View.VISIBLE);
                     myRequestsList.setVisibility(View.GONE);
-                }else {
+                } else {
                     myReqsNotFound.setVisibility(View.GONE);
                     myRequestsList.setVisibility(View.VISIBLE);
                 }
+
+                // hide loading indicator
                 myReqsLoading.setVisibility(View.GONE);
             }
         });
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
-        currentUserHandle();
-
-        retrieveWalkerRequests();
-        retrieveMyRequests();
+        if(currentUserHandle()) {
+            retrieveWalkerRequests();
+            retrieveMyRequests();
+        }
     }
 
     @Override
@@ -190,75 +206,20 @@ public class MainActivity extends BaseActivity implements View.OnClickListener
         }
     }
 
-
-    @Override
-    protected void onStop()
-    {
-        super.onStop();
-    }
-
     /**
      * Check if there is a current user logged in.
-     * yes - handle the current user and puts it's name in the action bar.
      * No - go to LoginActivity for login or register.
      */
+    private boolean currentUserHandle() {
+        if (ParseUser.getCurrentUser() == null) {
+            Log.d("MainActivity", "there is no current user, referring to login or register activity...");
 
-    private void currentUserHandle()
-    {
-        Log.d("My Loggggg","currentUserHandle");
-        SharedPreferences anyUserExists = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean currentUserExists = anyUserExists.getBoolean("USEREXISTS", false);
-
-        if (!currentUserExists || (ParseUser.getCurrentUser() == null))
-        {
-            Log.d("My Loggggg", "there is no current user, referring to login or register activity...");
-            Intent i = new Intent(this, Login.class);
+            Intent i = new Intent(this, LoginActivity.class);
             startActivity(i);
-        }/*
-        else
-        {
-            // connect between installation app to login user
-            ParseInstallation installation = ParseInstallation.getCurrentInstallation();
-            installation.put("user",ParseUser.getCurrentUser());
-            installation.saveEventually();
 
-            ParseUser currentUser = ParseUser.getCurrentUser();
+            return false;
+        }
 
-            // setTitle(currentUser.getUsername());//set the title in the action bar to be the username.
-            Log.d("My Loggggg", "user exists and logged in");
-            Log.d("My Loggggg", "the username that logged in is - " + currentUser.getUsername());
-
-        }*/
-    }
-
-    /**
-     * when the back button pressed, the user asked if he wants to exit the app.
-     */
-
-    @Override
-    public void onBackPressed()
-    {
-        final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
-        alertBuilder.setMessage("Do you want to exit the app?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        moveTaskToBack(true);
-                        android.os.Process.killProcess(android.os.Process.myPid());
-                        System.exit(1);
-                    }
-                })
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        Log.d("My Loggggg", "user canceled");
-
-                    }
-                });
-        alertBuilder.show();
+        return true;
     }
 }

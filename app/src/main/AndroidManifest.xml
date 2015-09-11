@@ -19,7 +19,7 @@
     <uses-permission android:name="com.dogwalker.itaynaama.dogwalker.permission.C2D_MESSAGE" />
 
     <application
-        android:name=".ParseAppInit"
+        android:name=".DogWalkerApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_dog_walkers_launcher"
         android:label="@string/app_name"
@@ -27,10 +27,6 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyBiqOmegoQVutLNlRRnWTv4qz-hdPneOFk" />
-
-        <service
-            android:name=".FetchAddressIntentService"
-            android:exported="false" />
 
         <activity
             android:name=".MainActivity"
@@ -43,20 +39,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".Login"
+            android:name=".LoginActivity"
             android:label="@string/title_activity_login" >
         </activity>
         <activity
-            android:name=".Register"
+            android:name=".RegisterActivity"
             android:label="@string/title_activity_register" >
-        </activity>
-        <activity
-            android:name=".OpeningActivity"
-            android:label="@string/title_activity_opening" >
-        </activity>
-        <activity
-            android:name=".SearchActivity"
-            android:label="@string/title_activity_search" >
         </activity>
         <activity
             android:name=".AddressSelectionActivity"
@@ -65,11 +53,6 @@
         <activity
             android:name=".WalkerSearchActivity"
             android:label="@string/title_activity_walker_search" >
-            <!--<intent-filter>-->
-                <!--<action android:name="android.intent.action.MAIN" />-->
-
-                <!--<category android:name="android.intent.category.LAUNCHER" />-->
-            <!--</intent-filter>-->
         </activity>
         <activity
             android:name=".ProfileView"

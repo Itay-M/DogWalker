@@ -24,30 +24,59 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Created by naama on 14/08/2015.
+ * Autocomplete adapter which fetch suggestion from the Google geocoder service.
  */
 public class GeocoderAutocompleteAdapter extends ArrayAdapter<GeocoderAutocompleteAdapter.AddressAutocompleteResult> implements Filterable, GoogleApiClient.OnConnectionFailedListener, GoogleApiClient.ConnectionCallbacks {
 
     /**
-     * Address autocomplete suggestions limit bounds
+     * Address autocomplete suggestions Top-Right (NE) limit bounds
      */
     static public final LatLng BOUNDS_TR = new LatLng(33.417551, 35.927429);
+    /**
+     * Address autocomplete suggestions Bottom-Left (SW) limit bounds
+     */
     static public final LatLng BOUNDS_BL = new LatLng(29.527829, 34.021740);
 
+    /**
+     * Number of maximum results returned
+     */
     static private final int AUTOCOMPLETE_MAX_RESULTS = 20;
 
+    /**
+     * The geocoder used to get suggestion based on user query / current location.
+     */
     private final Geocoder geocoder;
+    /**
+     * The filter created by this adapter. Save it for future use instead of recreating over and
+     * over.
+     */
     private Filter filter;
+
+    /**
+     * The last addresses fetched by this adapter. Used for accessing them (mainly) outside of this
+     * class.
+     */
     private List<AddressAutocompleteResult> lastAddresses;
+    /**
+     * The google client used to access last known location.
+     */
     private final GoogleApiClient googleClient;
+    /**
+     * The last search query used by this adapter
+     */
     private CharSequence lastCconstraint;
 
-    public GeocoderAutocompleteAdapter(Context context, int resource) {
-        super(context, resource);
+    /**
+     * Construct a new adapter bound to the given context
+     * @param context the context this adapter is bound to
+     */
+    public GeocoderAutocompleteAdapter(Context context) {
+        super(context, android.R.layout.simple_list_item_1);
 
         geocoder = new Geocoder(context);
         lastAddresses = Collections.EMPTY_LIST;
 
+        // initialize (and connect) a Google client in order to be able to get last user location
         googleClient = new GoogleApiClient.Builder(context)
                 .addOnConnectionFailedListener(this)
                 .addConnectionCallbacks(this)
@@ -81,16 +110,19 @@ public class GeocoderAutocompleteAdapter extends ArrayAdapter<GeocoderAutocomple
                     try {
                         // Skip the autocomplete query if no constraints are given.
                         if (constraint != null && constraint.length() > 0) {
+                            // search for addresses based on the user query
                             lastAddresses = AddressAutocompleteResult.wrap(
                                     geocoder.getFromLocationName(constraint.toString(), AUTOCOMPLETE_MAX_RESULTS, BOUNDS_BL.latitude,BOUNDS_BL.longitude,BOUNDS_TR.latitude,BOUNDS_TR.longitude));
+                            // fill in the filter results
                             results.values = lastAddresses;
                             results.count = lastAddresses.size();
-
-
                         }else{
+                            // get last known location
                             Location loc = LocationServices.FusedLocationApi.getLastLocation(googleClient);
                             if(loc!=null) {
+                                // search for addressed near the location
                                 lastAddresses = AddressAutocompleteResult.wrap(geocoder.getFromLocation(loc.getLatitude(), loc.getLongitude(), AUTOCOMPLETE_MAX_RESULTS));
+                                // fill in the filter results
                                 results.values = lastAddresses;
                                 results.count = lastAddresses.size();
                             }else{
@@ -98,7 +130,7 @@ public class GeocoderAutocompleteAdapter extends ArrayAdapter<GeocoderAutocomple
                             }
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.e("GeocodeAutocomplete", e.getMessage());
                     }
 
                     return results;
@@ -121,7 +153,7 @@ public class GeocoderAutocompleteAdapter extends ArrayAdapter<GeocoderAutocomple
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.e("GeocoderAutocomplete",connectionResult.toString());
+        Log.e("GeocoderAutocomplete","Google Client failed to connect: error #"+connectionResult.getErrorCode());
     }
 
     @Override
@@ -130,6 +162,8 @@ public class GeocoderAutocompleteAdapter extends ArrayAdapter<GeocoderAutocomple
         new Handler().post(new Runnable() {
             @Override
             public void run() {
+                // filter using the last search query - if it's empty/too short it will use the
+                // user location - which is now available
                 getFilter().filter(lastCconstraint);
             }
         });
@@ -137,7 +171,7 @@ public class GeocoderAutocompleteAdapter extends ArrayAdapter<GeocoderAutocomple
 
     @Override
     public void onConnectionSuspended(int i) {
-        Log.e("GeocoderAutocomplete","Google client SUSPENDED: "+i);
+        Log.e("GeocoderAutocomplete", "Google client SUSPENDED: "+i);
     }
 
     /**

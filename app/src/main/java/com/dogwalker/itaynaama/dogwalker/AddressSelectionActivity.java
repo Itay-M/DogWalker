@@ -29,11 +29,18 @@ import com.google.android.gms.location.places.ui.PlacePicker;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 
+/**
+ * Activity which allow the user to select an address. The address can be auto complete by the
+ * user location - if available - or by a search query. The user must select a single address from
+ * the suggestion.
+ * This activity will return the result of the selected address to its caller.
+ */
 public class AddressSelectionActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
-    static private final int LOCATION_REQUEST = 1000;
 
-    protected AutoCompleteTextView addressText;
-    protected ListView addressesListView;
+    /**
+     * The autocomplete adapter. The adapter will search for autocomplete suggestion from Google
+     * geocoder and will store the results until the search query will be changed.
+     */
     protected GeocoderAutocompleteAdapter adapter;
 
     @Override
@@ -41,15 +48,18 @@ public class AddressSelectionActivity extends AppCompatActivity implements Adapt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_address_selection);
 
-        addressesListView = (ListView)findViewById(R.id.lstAddresses);
-        addressText = (AutoCompleteTextView)findViewById(R.id.txtAddress);
+        ListView addressesListView = (ListView)findViewById(R.id.lstAddresses);
+        AutoCompleteTextView addressText = (AutoCompleteTextView)findViewById(R.id.txtAddress);
 
-        adapter = new GeocoderAutocompleteAdapter(this,android.R.layout.simple_list_item_1);
+        // create the Google geocoder autocomplete adapter
+        adapter = new GeocoderAutocompleteAdapter(this);
+        // link the adapter to the AutocompleteTextView
         addressText.setAdapter(adapter);
 
+        // list the adapter to the results list
         addressesListView.setAdapter(adapter);
+        // register list listener to handle item click
         addressesListView.setOnItemClickListener(this);
-
 
         // Acquire a reference to the system Location Manager
         LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -73,7 +83,7 @@ public class AddressSelectionActivity extends AppCompatActivity implements Adapt
                         @Override
                         public void onClick(DialogInterface dialog, int which)
                         {
-                            Log.d("My Loggggg", "user canceled");
+
                         }
                     });
             alertBuilder.show();
@@ -84,32 +94,10 @@ public class AddressSelectionActivity extends AppCompatActivity implements Adapt
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_address_selection, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
-    }
-
-    @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        // take the selected item's address, set it as a result and finish the activity
         Address address = adapter.getAddress(position);
         Intent i = new Intent();
-        // set the address as the result
         i.putExtra("address", address);
         setResult(RESULT_OK, i);
         finish();

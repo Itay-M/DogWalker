@@ -4,7 +4,7 @@ import android.app.Application;
 import com.parse.Parse;
 
 
-public class ParseAppInit extends Application
+public class DogWalkerApp extends Application
 {
     @Override
     public void onCreate()

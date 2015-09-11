@@ -1,60 +1,68 @@
 package com.dogwalker.itaynaama.dogwalker;
 
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.parse.ParseInstallation;
-import com.parse.ParsePush;
-import com.parse.ParseException;
-import com.parse.ParseFile;
 import com.parse.ParseUser;
 
-import java.io.ByteArrayOutputStream;
+/**
+ * A base class to use by all our main activities in order to maintain similar behavior across all
+ * the application activities (such as options menu, action bar etc).
+ */
+public abstract class BaseActivity extends AppCompatActivity {
 
-public class BaseActivity extends AppCompatActivity
-{
+    /**
+     * Indicates whenever this activity is at the most upper level - no back option should be
+     * presented and going back will trigger application exit.
+     */
+    private final boolean isTopActivity;
+
+    public BaseActivity(){
+        this.isTopActivity = false;
+    }
+
+    public BaseActivity(boolean isTopActivity){
+        this.isTopActivity = isTopActivity;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_base);
 
-        // show the actionBar's back button
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        // show/hide the actionBar's back button
+        getSupportActionBar().setDisplayHomeAsUpEnabled(!this.isTopActivity);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
+    public boolean onCreateOptionsMenu(Menu menu){
+        if(ParseUser.getCurrentUser()==null){
+            return false;
+        }
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_base, menu);
+
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-
-        switch(item.getItemId())
-        {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
             case R.id.logout_action:
                 logout();
                 return true;
-
             case R.id.view_profile_action:
                 viewProfile();
                 return true;
-
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -74,9 +82,9 @@ public class BaseActivity extends AppCompatActivity
     /**
      * Log out the current user.
      */
-    private void logout()
-    {
-        Toast.makeText(getApplicationContext(), "Logging out...", Toast.LENGTH_LONG).show();
+    private void logout() {
+        // logout the user from parse
+        Toast.makeText(getApplicationContext(), "Logged out", Toast.LENGTH_SHORT).show();
         ParseUser.logOut();
 
         // disconnect user from this installation
@@ -84,17 +92,45 @@ public class BaseActivity extends AppCompatActivity
         installation.remove("user");
         installation.saveEventually();
 
-        Intent i = new Intent(this, Login.class);
+        // take the user back to the Login activity
+        Intent i = new Intent(this, LoginActivity.class);
         startActivity(i);
     }
 
     /**
-     * Edit user's profile.
+     * View the user's profile.
      */
-    private void viewProfile()
-    {
+    private void viewProfile(){
         Intent i = new Intent(this, ProfileView.class);
         startActivity(i);
     }
 
+    /**
+     * when the back button pressed, the user asked if he wants to exit the app.
+     */
+    @Override
+    public void onBackPressed() {
+        if(this.isTopActivity) {
+            final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(this);
+            alertBuilder.setMessage("Do you want to exit the app?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            moveTaskToBack(true);
+                            android.os.Process.killProcess(android.os.Process.myPid());
+                            System.exit(1);
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Log.d("My Loggggg", "user canceled");
+
+                        }
+                    });
+            alertBuilder.show();
+        }else{
+            super.onBackPressed();
+        }
+    }
 }

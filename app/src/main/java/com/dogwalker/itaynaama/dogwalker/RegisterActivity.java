@@ -17,39 +17,32 @@ import android.location.Address;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseInstallation;
 import com.parse.ParseObject;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 
-import org.json.JSONArray;
-
 import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
 import java.util.Calendar;
 
 
-public class Register extends AppCompatActivity implements View.OnClickListener
+public class RegisterActivity extends AppCompatActivity implements View.OnClickListener
 {
     private static final int CAMERA_REQUEST = 0;
     private static final int REQUEST_ADDRESS = 1;
@@ -59,7 +52,6 @@ public class Register extends AppCompatActivity implements View.OnClickListener
     protected EditText nameET,usernameET,emailET,passwordET,phoneET,addressET;
     protected Address address;
     protected DatePicker bornDateDP;
-    SharedPreferences userPref;
     ParseFile photoFile;
     byte[] picByteArray;
     Bitmap bmPic;
@@ -118,23 +110,12 @@ public class Register extends AppCompatActivity implements View.OnClickListener
         pictureB.setOnClickListener(this);
         addressB.setOnClickListener(this);
 
-        phoneSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-        {
+        phoneSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
-            {
-                if (isChecked)
-                {
-                    sharePhone = true;
-                }
-                else
-                {
-                    sharePhone = false;
-                }
+            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
+                sharePhone = isChecked;
             }
         });
-
-        userPref = PreferenceManager.getDefaultSharedPreferences(this);
 
         //set the "GO" button in the keyboard to hide the keyboard
         emailET.setOnKeyListener(new View.OnKeyListener()
@@ -191,16 +172,14 @@ public class Register extends AppCompatActivity implements View.OnClickListener
                 if (pictureTaken)
                 {
                     Toast.makeText(getApplicationContext(), "saving photo", Toast.LENGTH_LONG).show();
-                    newProfilePicIV.setImageBitmap(bmPic);
+                    //newProfilePicIV.setImageBitmap(bmPic);
                     photoFile = new ParseFile(usernameET.getText().toString()+"profile_pic.jpg",picByteArray);
 
                     try
                     {
                         photoFile.save();
-                    }
-                    catch (ParseException e)
-                    {
-                        Log.d("My Loggggg", e.getMessage().toString());
+                    } catch (ParseException e){
+                        Log.d("My Loggggg", e.getMessage());
                     }
                     user.put("Photo", photoFile);
                     user.saveInBackground();
@@ -220,53 +199,17 @@ public class Register extends AppCompatActivity implements View.OnClickListener
                                 availability.saveInBackground();
                             }
 
-                            // Hooray! the user created successfully.
-                            // create and prompt alert for the successful user creation.
-                            final AlertDialog alert = new AlertDialog.Builder(Register.this).create();
-                            alert.setTitle("New User");//set the alert title.
-                            alert.setMessage("User created successfully");//set the alert message.
-                            alert.setCancelable(true);//set the back button to exit the alert.
-                            alert.setButton("OK", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    alert.cancel();//exit the alert.
-                                    //save the fact that there is a current user.
-                                    SharedPreferences.Editor editor = userPref.edit();
-                                    editor.putBoolean("USEREXISTS",true).commit();
-                                    //go to main activity.
-                                    Intent registerIntent = new Intent(Register.this, MainActivity.class);
-                                    startActivity(registerIntent);
-                                    finish();
-                                }
-                            });
+                            // since a login has been made - set the user on the installation object
+                            ParseInstallation installation = ParseInstallation.getCurrentInstallation();
+                            installation.put("user",ParseUser.getCurrentUser());
+                            installation.saveEventually();
 
-
-
-                            alert.show();
-                        }
-                        else
-                        {
-                            // TODO how to know what the problem to show to user
-                            // Sign up didn't succeed, Look at the ParseException to figure out what went wrong.
-                            //in addition prompt alert for the unsuccessful registration.
-                            Log.d("My Loggggg", e.getMessage().toString());
-                            final AlertDialog alert = new AlertDialog.Builder(Register.this).create();
-                            alert.setTitle("New User Error");//set the alert title.
-                            alert.setMessage("User creation failed!");//set the alert message.
-                            alert.setCancelable(true);//set the back button to exit the alert.
-                            alert.setButton("OK", new DialogInterface.OnClickListener()
-                            {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which)
-                                {
-
-                                    alert.cancel();//exit the alert.
-                                    finish();
-                                    startActivity(getIntent());
-                                }
-                            });
-
-                            alert.show();
+                            Toast.makeText(getApplicationContext(), "User created successfully", Toast.LENGTH_LONG);
+                            Intent registerIntent = new Intent(RegisterActivity.this, MainActivity.class);
+                            startActivity(registerIntent);
+                            finish();
+                        } else {
+                            Utils.showMessageBox(RegisterActivity.this,"Registration Failed",getString(R.string.unknown_error_occur));
                         }
                     }
                 });
@@ -281,7 +224,7 @@ public class Register extends AppCompatActivity implements View.OnClickListener
                 break;
 
             case (R.id.regAddressButton):
-                Intent addressSelectionIntent = new Intent(Register.this, AddressSelectionActivity.class);
+                Intent addressSelectionIntent = new Intent(RegisterActivity.this, AddressSelectionActivity.class);
                 startActivityForResult(addressSelectionIntent, REQUEST_ADDRESS);
 
                 break;

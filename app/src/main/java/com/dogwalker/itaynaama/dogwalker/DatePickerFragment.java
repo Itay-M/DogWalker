@@ -9,33 +9,42 @@ import android.widget.DatePicker;
 import android.widget.TextView;
 
 import java.util.Calendar;
+import java.util.Date;
 
 /**
- * Created by naama on 28/08/2015.
+ * A dialog fragment which let the user to select a date.
  */
 public class DatePickerFragment extends DialogFragment
         implements DatePickerDialog.OnDateSetListener {
 
+    /**
+     * A listener which will be notified when the user selected a date.
+     */
     private DatePickerListener listener;
-    private Calendar date;
 
     public DatePickerFragment(){
-        date = Calendar.getInstance();
+        super();
+
+        Bundle arguments = new Bundle();
+        arguments.putSerializable("date",Calendar.getInstance());
+        setArguments(arguments);
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        if(!(activity instanceof DatePickerListener)){
-            throw new RuntimeException("Activity must implement DatePickerListener interface");
-        }
-
-        listener = (DatePickerListener)activity;
+        // backward compatibility - check if the activity implement the lisener interface and use it
+        // as a listener
+        if(activity instanceof DatePickerListener && listener==null)
+            listener = (DatePickerListener)activity;
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
+        // get current date
+        Calendar date = (Calendar)getArguments().getSerializable("date");
+
         // Use the current date as the default date in the picker
         int year = date.get(Calendar.YEAR);
         int month = date.get(Calendar.MONTH);
@@ -47,16 +56,29 @@ public class DatePickerFragment extends DialogFragment
         return datePickerDialog;
     }
 
+    @Override
     public void onDateSet(DatePicker view, int year, int month, int day) {
+        // build the selected date
+        Calendar date = Calendar.getInstance();
         date.set(year, month, day);
-        listener.onDateSelected(date);
+        // update fragment date
+        getArguments().putSerializable("date",date);
+        // notify listener (if any)
+        if(listener!=null) {
+            listener.onDateSelected(date);
+        }
     }
 
-    public Calendar getDate(){
-        return date;
-    }
-
+    /**
+     * Simple interface to allow initiator of @DatePickerFragment to be notified when a date is
+     * being selected.
+     */
     public interface DatePickerListener{
+        /**
+         * Being called when a date is being selected.
+         *
+         * @param date the selected date
+         */
         void onDateSelected(Calendar date);
     }
 }
