@@ -59,7 +59,7 @@ public class WalkerRequestActivity extends BaseActivity {
         mNotifyMgr.cancel(requestId.hashCode());
 
         // get the user which his details should be presented
-        ParseUser user = new ParseUser();
+        final ParseUser user = new ParseUser();
         user.setObjectId(intent.getStringExtra("user"));
         try {
             user.fetch();
@@ -93,13 +93,16 @@ public class WalkerRequestActivity extends BaseActivity {
 
         // set the user details
         nameText.setText((String) user.get("name"));
-        /*nameText.setOnClickListener(new View.OnClickListener() {
+
+        nameText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent viewProfile = new Intent(WalkerRequestActivity.this,ProfileViewActivity.class);
+                viewProfile.putExtra("userId",user.getObjectId());
                 startActivity(viewProfile);
             }
-        });*/
+        });
+
         phoneText.setText((String)user.get("phone"));
 
         // display the request pickup date

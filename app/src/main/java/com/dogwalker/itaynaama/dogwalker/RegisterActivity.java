@@ -141,6 +141,14 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         switch (v.getId()) {
             case(R.id.registerButton):
 
+                // check that all the user availabilities are valid
+                for(int i=0;i<availabilityAdapter.getCount()-1;i++){
+                    if(!availabilityAdapter.getItem(i).isValid()){
+                        Utils.showMessageBox(v.getContext(),"Invalid period","At least one of the availability period are invalid");
+                        return;
+                    }
+                }
+
                 // create new user
                 final ParseUser user = new ParseUser();
 

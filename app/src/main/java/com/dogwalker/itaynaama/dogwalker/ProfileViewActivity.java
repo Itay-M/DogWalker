@@ -33,6 +33,7 @@ public class ProfileViewActivity extends BaseActivity implements View.OnClickLis
     protected ImageView viewPic;
     protected TextView name, userName, userCity, userPhone, userSharePhone;
     protected Button editButton;
+    protected ParseUser user;
 
     /**
      * Adapter to hold the user availabilities
@@ -45,6 +46,21 @@ public class ProfileViewActivity extends BaseActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_view);
 
+        Intent intent = getIntent();
+
+        if(intent.getStringExtra("userId")==null) {
+            user = ParseUser.getCurrentUser();
+        }else{
+            user = new ParseUser();
+            user.setObjectId(intent.getStringExtra("userId"));
+            try {
+                user.fetch();
+            } catch (ParseException e) {
+                Log.e("ProfileViewActivity",e.getMessage());
+                finish();
+            }
+        }
+
         // get UI components
         viewPic = (ImageView)findViewById(R.id.view_user_pic);
         editButton = (Button) findViewById(R.id.edit_profile_button);
@@ -55,7 +71,13 @@ public class ProfileViewActivity extends BaseActivity implements View.OnClickLis
         userSharePhone = (TextView)findViewById(R.id.profile_user_sharePhone);
 
         // handle edit button
-        editButton.setOnClickListener(this);
+        if(!user.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) {
+            editButton.setVisibility(View.GONE);
+            userName.setVisibility(View.GONE);
+            userCity.setVisibility(View.GONE);
+        }else {
+            editButton.setOnClickListener(this);
+        }
 
         // refresh user details
         fetchDetails();
@@ -65,23 +87,24 @@ public class ProfileViewActivity extends BaseActivity implements View.OnClickLis
      * Update the UI components with the user details
      */
     private void fetchDetails(){
-        ParseUser currentUser = ParseUser.getCurrentUser();
 
-        name.setText("Name: " + currentUser.get("name").toString());
-        userName.setText("UserName: " + currentUser.getUsername().toString());
-        userCity.setText("Address: " + Utils.addressToString(currentUser.getJSONArray("address"), ",\n"));
+        name.setText("Name: " + user.get("name").toString());
+        if(user.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) {
+            userName.setText("UserName: " + user.getUsername().toString());
+            userCity.setText("Address: " + Utils.addressToString(user.getJSONArray("address"), ",\n"));
+        }
 
-        boolean isShared = (boolean) currentUser.get("sharePhone");
-        if (isShared) {
-            userPhone.setText("Phone: " + currentUser.get("phone").toString());
-        } else {
+        boolean isShared = (boolean) user.get("sharePhone");
+        if (!isShared && !user.getObjectId().equals(ParseUser.getCurrentUser().getObjectId()) ) {
             userPhone.setText("Phone: Hidden");
+        } else {
+            userPhone.setText("Phone: " + user.get("phone").toString());
         }
 
         // user availability
         final GridLayout availabilityItems = (GridLayout)findViewById(R.id.view_availability_items);
         final ParseQuery<ParseObject> userAvailabilityQuery = new ParseQuery<>("UserAvailability");
-        userAvailabilityQuery.whereEqualTo("user", currentUser);
+        userAvailabilityQuery.whereEqualTo("user", user);
         userAvailabilityQuery.orderByAscending("startTime");
         userAvailabilityQuery.findInBackground(new FindCallback<ParseObject>() {
             // get list of weekdays names
@@ -139,7 +162,7 @@ public class ProfileViewActivity extends BaseActivity implements View.OnClickLis
 
         // user profile picture
         try {
-            ParseFile p = currentUser.getParseFile("photo");
+            ParseFile p = user.getParseFile("photo");
             if(p != null) {
                 Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
                 viewPic.setImageBitmap(b);
