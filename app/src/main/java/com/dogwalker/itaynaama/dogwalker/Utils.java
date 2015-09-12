@@ -32,11 +32,17 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
- * Created by naama on 31/08/2015.
+ * Utility class
  */
 public class Utils {
 
+    /**
+     * The common date format used in the application
+     */
     public static final java.text.DateFormat DISPLAY_DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy");
+    /**
+     * The common time format used in the application
+     */
     public static final java.text.DateFormat DISPLAY_TIME_FORMAT = new SimpleDateFormat("HH:mm");
 
     /**
@@ -46,7 +52,7 @@ public class Utils {
      * @return the converted address string presentation
      */
     static public String addressToString(Address addr){
-        return addressToString(addr,",\n");
+        return addressToString(addr, ",\n");
     }
 
     /**
@@ -67,13 +73,28 @@ public class Utils {
         return res.toString();
     }
 
+    /**
+     * Convert the address - given as JSONArray of lines - to a string presentation. The address
+     * lines will be separated by a comma and a new line
+     *
+     * @param addr the address lines
+     * @return the address as string
+     */
     static public String addressToString(JSONArray addr){
         return addressToString(addr, ",\n");
     }
+
+    /**
+     * Convert the address - given as JSONArray of lines - to a string presentation. The address
+     * lines will be separated by the given separator string.
+     *
+     * @param addr the address lines
+     * @return the address as string
+     */
     static public String addressToString(JSONArray addr,String sep){
         if(addr==null) return "";
 
-        StringBuilder res = new StringBuilder();
+        /*StringBuilder res = new StringBuilder();
         for(int i=0;i<addr.length();i++){
             try {
                 res.append(addr.getString(i));
@@ -82,9 +103,21 @@ public class Utils {
                 res.append(sep);
             }
         }
-        return res.toString();
+        return res.toString();*/
+
+        try {
+            return addr.join(sep);
+        } catch (JSONException e) {
+            return "";
+        }
     }
 
+    /**
+     * Convert an address object into a JSONArray of lines.
+     *
+     * @param address the address to convert
+     * @return a JSONArray with the address lines
+     */
     static public JSONArray addressToJSONArray(Address address){
         JSONArray addressLines = new JSONArray();
         for (int i=0; i<=address.getMaxAddressLineIndex();i++){
@@ -93,14 +126,14 @@ public class Utils {
         return addressLines;
     }
 
-    static public Adapter getActualListAdapter(ListAdapter adapter){
-        if(adapter instanceof WrapperListAdapter)
-            return getActualListAdapter(((WrapperListAdapter)adapter).getWrappedAdapter());
-        return adapter;
-    }
-
-
-    // create message box
+    /**
+     * Show a cancelable message dialog with the given title and mesasge. The message will only
+     * have one single "OK" button.
+     *
+     * @param context the context to be used in order to display the dialog
+     * @param title the title of the message dialog
+     * @param msg the content of the message dialog
+     */
     static public void showMessageBox(Context context,String title, String msg){
         AlertDialog.Builder dlgAlert  = new AlertDialog.Builder(context);
         dlgAlert.setTitle(title);
@@ -109,6 +142,12 @@ public class Utils {
         dlgAlert.create().show();
     }
 
+    /**
+     * Convert the given time in minutes to a string presentation by the common format.
+     *
+     * @param minutes the time to convert in minutes
+     * @return the time as string presentation
+     */
     static public String formatMinutesAsTime(int minutes){
         Calendar time = Calendar.getInstance();
         time.set(Calendar.HOUR_OF_DAY, minutes / 60);
@@ -166,7 +205,6 @@ public class Utils {
             }
         });
     }
-
 
     /**
      * convert a rectangle picture into a circle picture

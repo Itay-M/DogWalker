@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.parse.FindCallback;
 import com.parse.ParseException;
@@ -31,17 +32,39 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * The activity allow the user to search for a walker based on an address and date and time which
+ * he choose. The results will be displayed as a user list and the user should choose one of them.
+ * The selected user will be notified by a push notification.
+ */
 public class WalkerSearchActivity extends BaseActivity implements DatePickerFragment.DatePickerListener, TimePickerFragment.TimePickerListener {
-    private static final int REQUEST_ADDRESS = 1;
-    private static final int REQUEST_USER = 2;
+    /**
+     * The radius (in kilometers) to search for users around the selected pickup address
+     */
+    static private final int USERS_SEARCH_RADIUS = 20;
+    /**
+     * A request code to identify result from address selection
+     */
+    static private final int REQUEST_ADDRESS = 1;
+    /**
+     * A request code to identify result from user selection
+     */
+    static private final int REQUEST_USER = 2;
 
-    protected Button locationButton;
-    protected Button searchWalker;
-    protected TextView dateText;
-    protected TextView timeText;
-    protected TextView addressText;
+    // UI components
+    protected TextView dateText,timeText,addressText;
+
+    /**
+     * The pickup date selected
+     */
     protected Calendar date;
+    /**
+     * The pickup time (as minutes) selected
+     */
     protected int time;
+    /**
+     * The pickup address selected
+     */
     protected Address address;
 
     @Override
@@ -49,20 +72,22 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_walker_search);
 
-        locationButton = (Button)findViewById(R.id.walker_search_location_btn);
-        dateText = (TextView)findViewById(R.id.walker_search_date);
-        timeText = (TextView)findViewById(R.id.walker_search_time);
-        searchWalker = (Button)findViewById(R.id.walker_search_search_btn);
-        addressText = (TextView)findViewById(R.id.walker_search_address);
-
-        // initialize selected date to current date
+        // initialize selected date and time to current time
         this.date = Calendar.getInstance();
         this.time = date.get(Calendar.HOUR_OF_DAY)*60+date.get(Calendar.MINUTE);
 
+        // get UI components
+        Button locationButton = (Button)findViewById(R.id.walker_search_location_btn);
+        Button searchWalker = (Button)findViewById(R.id.walker_search_search_btn);
+        dateText = (TextView)findViewById(R.id.walker_search_date);
+        timeText = (TextView)findViewById(R.id.walker_search_time);
+        addressText = (TextView)findViewById(R.id.walker_search_address);
+
+        // init date and time UI components
         dateText.setText(Utils.DISPLAY_DATE_FORMAT.format(date.getTime()));
         timeText.setText(Utils.DISPLAY_TIME_FORMAT.format(date.getTime()));
 
-        //handle location choosing button
+        //handle address choosing button
         locationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,15 +121,13 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
         searchWalker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Calendar currentTime = Calendar.getInstance();
 
-                // check that the chosen time is in the future (ignore seconds
+                // check that the chosen time is in the future (ignore seconds and milliseconds)
                 date.set(Calendar.HOUR_OF_DAY,time/60);
                 date.set(Calendar.MINUTE,time%60);
                 date.set(Calendar.SECOND,currentTime.get(Calendar.SECOND));
                 date.set(Calendar.MILLISECOND,currentTime.get(Calendar.MILLISECOND));
-
                 if (date.compareTo(currentTime) < 0) {
                     Utils.showMessageBox(WalkerSearchActivity.this, "Action Failed", "The date and time you choose are in the past");
                     return;
@@ -116,42 +139,49 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                     return;
                 }
 
+                // build geo point from the address location
                 ParseGeoPoint addressGeoPoint = new ParseGeoPoint();
                 addressGeoPoint.setLatitude(address.getLatitude());
                 addressGeoPoint.setLongitude(address.getLongitude());
 
-                ParseQuery<ParseUser> usersQuery = new ParseQuery<ParseUser>(ParseUser.class);
-                usersQuery.whereWithinKilometers("addressLocation", addressGeoPoint, 20);
+                // search for relevant users based on their address
+                ParseQuery<ParseUser> usersQuery = new ParseQuery<ParseUser>(ParseUser.class)
+                        .whereWithinKilometers("addressLocation", addressGeoPoint, USERS_SEARCH_RADIUS);
 
-                // found walkers that can according to criterion
-                ParseQuery<ParseObject> availabilityQuery = new ParseQuery("UserAvailability");
-                availabilityQuery.whereContainsAll("days", Collections.singleton(date.get(Calendar.DAY_OF_WEEK)));
-                availabilityQuery.whereLessThanOrEqualTo("startTime", time);
-                availabilityQuery.whereGreaterThanOrEqualTo("endTime", time);
-                availabilityQuery.selectKeys(Arrays.asList("user"));
-                availabilityQuery.whereMatchesKeyInQuery("user", "objectId", usersQuery);
-                availabilityQuery.include("user");
-                availabilityQuery.whereNotEqualTo("user",ParseUser.getCurrentUser());
+                // search for relevant users based on their availability
+                ParseQuery<ParseObject> availabilityQuery = new ParseQuery("UserAvailability")
+                        .whereContainsAll("days", Collections.singleton(date.get(Calendar.DAY_OF_WEEK)))
+                        .whereLessThanOrEqualTo("startTime", time)
+                        .whereGreaterThanOrEqualTo("endTime", time)
+                        .selectKeys(Arrays.asList("user"))
+                        .whereMatchesKeyInQuery("user", "objectId", usersQuery)
+                        .include("user")
+                        .whereNotEqualTo("user", ParseUser.getCurrentUser());
 
                 // retrieval all users from DB
                 availabilityQuery.findInBackground(new FindCallback<ParseObject>() {
                     public void done(List<ParseObject> usersAvailability, ParseException e) {
                         if (e == null) {
+                            // build list of all users' info
                             ArrayList<ParseUserInfo> users = new ArrayList<>();
                             for (final ParseObject userAvailability : usersAvailability) {
                                 ParseUser user = userAvailability.getParseUser("user");
                                 users.add(new ParseUserInfo(user));
                             }
+
+                            // create an intent for the user selection activity with all the
+                            // returned users
                             Intent usersSelectionIntent = new Intent(WalkerSearchActivity.this, UserSelectionActivity.class);
                             usersSelectionIntent.putExtra("users", users);
-
-                            // send details of pickup address
+                            // add the pickup address location to the intent (for the distance
+                            // calculation)
                             usersSelectionIntent.putExtra("addressLocationLng", address.getLongitude());
                             usersSelectionIntent.putExtra("addressLocationLat", address.getLatitude());
 
+                            // start the user selection activity
                             startActivityForResult(usersSelectionIntent, REQUEST_USER);
                         } else {
-                            Log.d("users", "Error: " + e.getMessage());
+                            Log.e("WalkerSearchActivity", "Failed getting users: " + e.getMessage());
                         }
                     }
                 });
@@ -167,21 +197,19 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                 // check that user choose option
                 if(resultCode==RESULT_OK){
                     Address address = data.getParcelableExtra("address");
-                    addressText.setText(Utils.addressToString(address));
                     this.address = address;
+                    addressText.setText(Utils.addressToString(address));
                 }
                 break;
             case REQUEST_USER:
                 if(resultCode==RESULT_OK){
-                    // push the objectId of selected walker
+                    // get the selected user info
                     ParseUserInfo user = (ParseUserInfo) data.getSerializableExtra("user");
-                    final ParseUser puser = new ParseUser();
-                    puser.setObjectId(user.getObjectId());
 
                     // save request details in db
                     final ParseObject request = new ParseObject("Requests");
                     request.put("from", ParseUser.getCurrentUser());
-                    request.put("to", puser);
+                    request.put("to", ParseObject.createWithoutData(ParseUser.class,user.getObjectId()));
                     request.put("datePickup", date.getTime());
                     request.put("timePickup", time);
                     request.put("address", Utils.addressToJSONArray(address));
@@ -192,34 +220,36 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                             if(e==null){
                                 // take all installation app of selected walker
                                 ParseQuery<ParseInstallation> userInstallationQuery = new ParseQuery<>(ParseInstallation.class);
-                                userInstallationQuery.whereEqualTo("user", puser);
+                                userInstallationQuery.whereEqualTo("user", request.getParseUser("to"));
 
-                                // create push details
+                                // create push to the user installations
                                 ParsePush push = new ParsePush();
                                 push.setQuery(userInstallationQuery);
-
+                                // set push data
                                 JSONObject pushData = new JSONObject();
                                 try {
                                     pushData.put("action","com.dogwalker.itaynaama.dogwalker.WALKING_REQUEST");
-                                    // save request id
                                     pushData.put("reqId",request.getObjectId());
                                 } catch (JSONException e1) {}
                                 push.setData(pushData);
+
                                 // send push
                                 push.sendInBackground(new SendCallback() {
                                     @Override
                                     public void done(ParseException e) {
                                         if(e==null){
-                                            Utils.showMessageBox(WalkerSearchActivity.this,"Request Sent", "A request has been sent to the selected Walker");
+                                            //Utils.showMessageBox(WalkerSearchActivity.this,"Request Sent", "A request has been sent to the selected Walker");
+                                            Toast.makeText(getApplicationContext(),"A request has been sent to the selected Walker",Toast.LENGTH_LONG).show();
+                                            finish();
                                         }else{
-                                            Utils.showMessageBox(WalkerSearchActivity.this,"Send Request Failed", "The message not send, try later");
-                                            Log.e("Push",e.getMessage());
+                                            Utils.showMessageBox(WalkerSearchActivity.this,"Send Request Failed", getString(R.string.unknown_error_occur));
+                                            Log.e("Push","Failed sending push: "+e.getMessage());
                                         }
                                     }
                                 });
                             }else{
-                                Utils.showMessageBox(WalkerSearchActivity.this,"Send Request Failed", "The message not send, try later");
-                                Log.e("SaveRequest", e.getMessage());
+                                Utils.showMessageBox(WalkerSearchActivity.this, "Send Request Failed", getString(R.string.unknown_error_occur));
+                                Log.e("SaveRequest", "Saving request failed: "+e.getMessage());
                             }
                         }
                     });
@@ -241,11 +271,11 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
         this.time = time;
     }
 
-    /*
-        this class create to pass ParseUser to intent (the object must to be serializable)
+    /**
+     * A class used to pass user information between one activity to another.
      */
     static public class ParseUserInfo implements Serializable{
-        private String username;
+        private String name;
         private String address;
         private String objectId;
         private String phone;
@@ -257,8 +287,13 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
 
         public ParseUserInfo(){}
 
+        /**
+         * Create a new UserInfo initialized from the given ParseUser object.
+         *
+         * @param user the ParseUser to be initialized from
+         */
         public ParseUserInfo(ParseUser user){
-            username = user.getUsername();
+            name = user.getString("name");
             address = user.getString("address");
             phone = user.getString("phone");
             sharePhone = user.getBoolean("sharePhone");
@@ -268,15 +303,11 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
             addressLocationLat = addressLocation.getLatitude();
             addressLocationLng = addressLocation.getLongitude();
 
-            ParseFile p = user.getParseFile("photo");
             try{
-                if(p != null) {
-                    profilePicture = p.getData();
-                }else{
-                    profilePicture = null;
-                }
+                ParseFile p = user.getParseFile("photo");
+                profilePicture = (p==null?null:p.getData());
             }catch (ParseException e){
-                Log.d("My Loggggg", e.getMessage().toString());
+                Log.e("UserInfo", "Failed get user profile picture: " + e.getMessage());
             }
         }
 
@@ -288,8 +319,8 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
             return address;
         }
 
-        public String getUsername() {
-            return username;
+        public String getName() {
+            return name;
         }
 
         public String getObjectId() {
@@ -300,15 +331,13 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
             return profilePicture;
         }
 
+        /**
+         * Calculate the age of the user (approximately).
+         * @return
+         */
         public double getAge() {
-            double age=0;
             Calendar today = Calendar.getInstance();
-            long todayInMillis = today.getTimeInMillis();
-            long bornInMillis = bornDate.getTime();
-
-            age = (todayInMillis-bornInMillis)/1000.0/60/60/24/365;
-
-            return age;
+            return (today.getTimeInMillis()-bornDate.getTime())/1000.0/60/60/24/365;
         }
 
         public String getPhone() {

@@ -1,10 +1,8 @@
 package com.dogwalker.itaynaama.dogwalker;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,10 +12,8 @@ import android.widget.TextView;
 
 import com.parse.ParseException;
 import com.parse.ParseFile;
-import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,7 +27,7 @@ public class WalkerRequestsListAdapter extends ArrayAdapter<ParseObject> {
     protected String userKey;
 
     public WalkerRequestsListAdapter(Context context, List<ParseObject> requests, String userKey) {
-        super(context, R.layout.walker_requests_row, R.id.walker_request_row_name, requests);
+        super(context, R.layout.walker_request_row, R.id.walker_request_row_name, requests);
         this.userKey = userKey;
     }
 

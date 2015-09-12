@@ -41,37 +41,49 @@ import com.parse.SignUpCallback;
 import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
 
-
-public class RegisterActivity extends AppCompatActivity implements View.OnClickListener
-{
+/**
+ * New user registration activity. The user should fill in all the required details and a new
+ * user will be created and automatically logged in.
+ */
+public class RegisterActivity extends AppCompatActivity implements View.OnClickListener {
+    /**
+     * Request code to identify response from the camera
+     */
     private static final int CAMERA_REQUEST = 0;
+    /**
+     * Request code to identify response from the address selection activity
+     */
     private static final int REQUEST_ADDRESS = 1;
-    private boolean pictureTaken = false;
+
+    // UI components
     protected Button registerB,pictureB,addressB;
     protected ImageView newProfilePicIV;
     protected EditText nameET,usernameET,emailET,passwordET,phoneET,addressET;
-    protected Address address;
     protected DatePicker bornDateDP;
-    ParseFile photoFile;
-    byte[] picByteArray;
-    Bitmap bmPic;
-    private UserAvailabilityAdapter availabilityAdapter;
     protected Switch phoneSwitch;
-    protected boolean sharePhone = false;
+
+    /**
+     * The selected address
+     */
+    protected Address address;
+    /**
+     * The profile picture stored as a byte array
+     */
+    byte[] picByteArray;
+    /**
+     * Adapter that holds all the selected user availabilities
+     */
+    private UserAvailabilityAdapter availabilityAdapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
 
+        // get UI components
         newProfilePicIV = (ImageView) findViewById(R.id.newProfilePicView);
-
-        //Buttons
         registerB = (Button) findViewById(R.id.registerButton);
         pictureB = (Button) findViewById(R.id.pictureButton);
-
-        //editTexts
         nameET = (EditText)findViewById(R.id.regNameEditText);
         usernameET = (EditText)findViewById(R.id.regUsernameEditText);
         emailET = (EditText)findViewById(R.id.regEmailEditText);
@@ -80,14 +92,17 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         passwordET = (EditText)findViewById(R.id.regPasswordEditText);
         phoneET = (EditText)findViewById(R.id.regPhoneEditText);
         bornDateDP = (DatePicker)findViewById(R.id.regDatePicker);
-
-        //switch
         phoneSwitch = (Switch) findViewById(R.id.phone_switch);
 
-        // availability
+        // handle buttons click
+        registerB.setOnClickListener(this);
+        pictureB.setOnClickListener(this);
+        addressB.setOnClickListener(this);
+
+        // user availability
+        final LinearLayout availabilityItems = (LinearLayout) findViewById(R.id.register_availability_items);
         availabilityAdapter = new UserAvailabilityAdapter(this);
         availabilityAdapter.add(new AvailabilityRecord());
-        final LinearLayout availabilityItems = (LinearLayout)findViewById(R.id.register_availability_items);
         availabilityAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
@@ -105,33 +120,16 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         });
         availabilityAdapter.notifyDataSetChanged();
 
-        //onClick listeners
-        registerB.setOnClickListener(this);
-        pictureB.setOnClickListener(this);
-        addressB.setOnClickListener(this);
-
-        phoneSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                sharePhone = isChecked;
-            }
-        });
-
         //set the "GO" button in the keyboard to hide the keyboard
-        emailET.setOnKeyListener(new View.OnKeyListener()
-        {
+        emailET.setOnKeyListener(new View.OnKeyListener() {
             @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event)
-            {
-                if (keyCode == KeyEvent.KEYCODE_ENTER)
-                {
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER) {
                     //hide the keyboard
                     InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                     return true;
-                }
-                else
-                {
+                } else {
                     return false;
                 }
             }
@@ -139,17 +137,14 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    public void onClick(View v)
-    {
-
-        switch (v.getId())
-        {
+    public void onClick(View v) {
+        switch (v.getId()) {
             case(R.id.registerButton):
 
-                //new user creation.
+                // create new user
                 final ParseUser user = new ParseUser();
 
-                //retrieve data from the EditText objects and place it as the user data.
+                // fill in details from the components
                 user.setUsername(usernameET.getText().toString());
                 user.setPassword(passwordET.getText().toString());
                 user.setEmail(emailET.getText().toString().toLowerCase());
@@ -157,7 +152,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 user.put("address", Utils.addressToJSONArray(address));
                 user.put("phone", phoneET.getText().toString());
                 user.put("addressLocation",new ParseGeoPoint(address.getLatitude(),address.getLongitude()));
-                user.put("sharePhone",sharePhone);
+                user.put("sharePhone",phoneSwitch.isChecked());
 
                 // save born date
                 int day = bornDateDP.getDayOfMonth()+ 1;
@@ -165,33 +160,23 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 int year = bornDateDP.getYear();
                 Calendar c = Calendar.getInstance();
                 c.set(year, month, day);
-                user.put("bornDate",c.getTime());
+                user.put("bornDate", c.getTime());
 
-                //if the new user took a profile picture - save it to parse data base
-                Log.d("My Loggggg", String.valueOf(pictureTaken));
-                if (pictureTaken)
-                {
-                    Toast.makeText(getApplicationContext(), "saving photo", Toast.LENGTH_LONG).show();
-                    //newProfilePicIV.setImageBitmap(bmPic);
-                    photoFile = new ParseFile(usernameET.getText().toString()+"profile_pic.jpg",picByteArray);
-
-                    try
-                    {
+                // handle profile picture
+                if (picByteArray!=null) {
+                    ParseFile photoFile = new ParseFile(usernameET.getText().toString()+"profile_pic.jpg",picByteArray);
+                    try {
                         photoFile.save();
                     } catch (ParseException e){
-                        Log.d("My Loggggg", e.getMessage());
+                        Log.e("Register", "Saving profile picture failed: " + e.getMessage());
                     }
                     user.put("photo", photoFile);
-                    user.saveInBackground();
                 }
 
                 //register the new user in Parse database.
-                user.signUpInBackground(new SignUpCallback()
-                {
-                    public void done(final ParseException e)
-                    {
-                        if (e == null)
-                        {
+                user.signUpInBackground(new SignUpCallback() {
+                    public void done(final ParseException e) {
+                        if (e == null) {
                             // add user availability and place it in parse
                             for(int i=0;i<availabilityAdapter.getCount()-1;i++){
                                 ParseObject availability = availabilityAdapter.getItem(i).toParseObject();
@@ -204,9 +189,10 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                             installation.put("user",ParseUser.getCurrentUser());
                             installation.saveEventually();
 
+                            // move the user to the main activity
                             Toast.makeText(getApplicationContext(), "User created successfully", Toast.LENGTH_LONG);
-                            Intent registerIntent = new Intent(RegisterActivity.this, MainActivity.class);
-                            startActivity(registerIntent);
+                            Intent i = new Intent(RegisterActivity.this, MainActivity.class);
+                            startActivity(i);
                             finish();
                         } else {
                             Utils.showMessageBox(RegisterActivity.this,"Registration Failed",getString(R.string.unknown_error_occur));
@@ -224,6 +210,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 break;
 
             case (R.id.regAddressButton):
+                // move user to address selection activity
                 Intent addressSelectionIntent = new Intent(RegisterActivity.this, AddressSelectionActivity.class);
                 startActivityForResult(addressSelectionIntent, REQUEST_ADDRESS);
 
@@ -232,60 +219,28 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
-    {
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST)
-        {
-            pictureTaken = true;
+        if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST) {
 
             //get the photo
-            bmPic = (Bitmap) data.getExtras().get("data");
-
+            Bitmap bmPic = (Bitmap) data.getExtras().get("data");
             //convert and scale the photo
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bmPic.compress(Bitmap.CompressFormat.JPEG,100,stream);
-
             //put the photo in byte array
             picByteArray = stream.toByteArray();
             //present the photo that is going to be save in circle view
-            newProfilePicIV.setImageBitmap(getCircleBitmap(bmPic));
+            newProfilePicIV.setImageBitmap(Utils.getCircleBitmap(bmPic));
 
         }else if(resultCode == RESULT_OK && requestCode == REQUEST_ADDRESS){
 
+            // save the address for later use
             Address address = data.getParcelableExtra("address");
-            addressET.setText(Utils.addressToString(address));
             this.address = address;
+            // update UI to display the selected address
+            addressET.setText(Utils.addressToString(address));
         }
-
-
-    }
-
-    /**
-     * convert a rectangle picture into a circle picture
-     * @param bitmap - the picture
-     * @return a rounded bitmap picture
-     */
-    private Bitmap getCircleBitmap(Bitmap bitmap)
-    {
-        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        final Canvas canvas = new Canvas(output);
-        final int color = Color.RED;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        final RectF rectF = new RectF(rect);
-
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        canvas.drawOval(rectF, paint);
-
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-
-        bitmap.recycle();
-
-        return output;
     }
 }

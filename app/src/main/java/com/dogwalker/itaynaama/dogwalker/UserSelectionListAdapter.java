@@ -10,52 +10,61 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.parse.ParseGeoPoint;
-import com.parse.ParseUser;
 
-import java.util.Date;
 import java.util.List;
 
 /**
- * Created by naama on 22/08/2015.
+ * An adapter which holds a list of users. Each user is displayed with all its details (name,
+ * phone, address etc).
  */
 public class UserSelectionListAdapter extends ArrayAdapter<WalkerSearchActivity.ParseUserInfo>{
 
-    private ParseGeoPoint pickUpLocation;
+    /**
+     * The location to which the distance from the user address should be calculated.
+     * If not set, no distance will be presented.
+     */
+    private final ParseGeoPoint distanceLocation;
 
-    public UserSelectionListAdapter(Context context, List<WalkerSearchActivity.ParseUserInfo> users,ParseGeoPoint pickupLocation) {
-        super(context, R.layout.result_walker_search_row, R.id.result_row_username, users);
-        this.pickUpLocation = pickupLocation;
-
+    public UserSelectionListAdapter(Context context, List<WalkerSearchActivity.ParseUserInfo> users,ParseGeoPoint distanceLocation) {
+        super(context, R.layout.user_row, R.id.result_row_username, users);
+        this.distanceLocation = distanceLocation;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View row = super.getView(position, convertView, parent);
+
         WalkerSearchActivity.ParseUserInfo user = getItem(position);
 
+        // get UI components
         TextView username = (TextView)row.findViewById(R.id.result_row_username);
         TextView address = (TextView)row.findViewById(R.id.result_row_distance);
         ImageView photo = (ImageView)row.findViewById(R.id.result_row_photo);
         TextView age = (TextView)row.findViewById(R.id.result_row_age);
         TextView phone = (TextView)row.findViewById(R.id.result_row_phone);
 
-        username.setText(user.getUsername());
+        // set user name
+        username.setText(user.getName());
 
-        //show the profile picture of available user if not exist showed default photo
+        // show the profile picture if available
         byte[] p = user.getProfilePicture();
         if(p!=null) {
             Bitmap b = BitmapFactory.decodeByteArray(p, 0, p.length);
             photo.setImageBitmap(b);
         }
 
-        // calculate distance from pickup address to available user
-        double distance = pickUpLocation.distanceInKilometersTo(user.getAddressLocation());
-        address.setText((((int) (distance * 10)) / 10.0) + " km");
+        // show the distance to user (if distanceLocation has been set)
+        if(distanceLocation!=null) {
+            double distance = distanceLocation.distanceInKilometersTo(user.getAddressLocation());
+            address.setText((((int) (distance * 10)) / 10.0) + " km");
+        }else{
+            address.setText("");
+        }
 
-        // show age of user
+        // show the age of user
         age.setText((((int)(user.getAge()*10))/10.0)+" years old");
 
-        //show phone of user if his want to expose it
+        // show the user phone (if he allow it)
         if(user.isSharePhone()){
             phone.setText(user.getPhone());
         }else{
@@ -63,7 +72,5 @@ public class UserSelectionListAdapter extends ArrayAdapter<WalkerSearchActivity.
         }
 
         return row;
-
-
     }
 }

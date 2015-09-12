@@ -21,11 +21,11 @@
     <string name="walker_search_location_label">Pickup loaction:</string>
     <string name="walker_search_loc_btn_hint">Change pickup address</string>
     <string name="walker_search_time_label">Choose When</string>
-    <string name="title_activity_profile_view">ProfileView</string>
+    <string name="title_activity_profile_view">Profile</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_user_selction">Select User</string>
-    <string name="title_activity_profile_edit">ProfileEdit</string>
+    <string name="title_activity_profile_edit">Profile Edit</string>
     <string name="title_activity_walker_request">Request Details</string>
 
     <string name="walking_request_intent_action">com.dogwalker.itaynaama.dogwalker.WALKING_REQUEST</string>

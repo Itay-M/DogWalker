@@ -11,9 +11,14 @@ import android.widget.TextView;
 import java.util.Calendar;
 
 /**
- * Created by naama on 08/09/2015.
+ * Adapter which holds a list of user availabilities. The adapter is responsible for generating the
+ * user availability row which provide option for the user to define an hour range and a set of days
+ * which together form an AvailabilityRecord record.
  */
 public class UserAvailabilityAdapter extends ArrayAdapter<AvailabilityRecord> implements View.OnClickListener {
+    /**
+     * Time picker fragment used to select the start and end time of each record
+     */
     private final TimePickerFragment timePicker = new TimePickerFragment();
 
     public UserAvailabilityAdapter(FragmentActivity context){
@@ -26,12 +31,13 @@ public class UserAvailabilityAdapter extends ArrayAdapter<AvailabilityRecord> im
 
         final AvailabilityRecord record = getItem(position);
 
-        // set text view of time start and time end
+        // init start time
         TextView fromTextView = (TextView)row.findViewById(R.id.availability_row_from);
         fromTextView.setText(Utils.formatMinutesAsTime(record.getTimeFrom()));
         fromTextView.setTag(record);
         fromTextView.setOnClickListener(this);
 
+        // init end time
         TextView untilTextView = (TextView)row.findViewById(R.id.availability_row_until);
         untilTextView.setText(Utils.formatMinutesAsTime(record.getTimeUntil()));
         untilTextView.setTag(record);
@@ -49,7 +55,7 @@ public class UserAvailabilityAdapter extends ArrayAdapter<AvailabilityRecord> im
         addButton.setTag(record);
         addButton.setOnClickListener(this);
 
-        // set day's checks box
+        // set days checksboxes
         for(int i=0;i<7;i++) {
             CheckBox chk = (CheckBox) row.findViewById(getContext().getResources().getIdentifier("availability_row_day"+(i+1),"id",getClass().getPackage().getName()));
             chk.setChecked(record.isDaySelected(i));
@@ -70,10 +76,12 @@ public class UserAvailabilityAdapter extends ArrayAdapter<AvailabilityRecord> im
         final AvailabilityRecord record = (AvailabilityRecord)v.getTag();
 
         switch(v.getId()){
+            // remove button
             case R.id.availability_row_remove:
                 remove(record);
                 notifyDataSetChanged();
                 break;
+            // add button
             case R.id.availability_row_add:
                 if(record.isValid()) {
                     add(new AvailabilityRecord());
@@ -82,6 +90,7 @@ public class UserAvailabilityAdapter extends ArrayAdapter<AvailabilityRecord> im
                     Utils.showMessageBox(v.getContext(),"Invalid period","Please select at least 1 day and make sure the start time is before the end time.");
                 }
                 break;
+            // start time clicked - popup a time picker fragment
             case R.id.availability_row_from:
                 timePicker.setDefaultTime(record.getTimeFrom());
                 timePicker.setListener(new TimePickerFragment.TimePickerListener() {
@@ -93,6 +102,7 @@ public class UserAvailabilityAdapter extends ArrayAdapter<AvailabilityRecord> im
                 });
                 timePicker.show(((FragmentActivity)getContext()).getSupportFragmentManager(),"timePicker");
                 break;
+            // end time clicked - popup a time picker fragment
             case R.id.availability_row_until:
                 timePicker.setDefaultTime(record.getTimeUntil());
                 timePicker.setListener(new TimePickerFragment.TimePickerListener() {

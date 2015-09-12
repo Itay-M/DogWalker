@@ -55,7 +55,7 @@
         android:layout_marginTop="40dp"
         android:textSize="20pt"
         android:gravity="center"
-        android:textColor="#79103fff" />
+        android:textColor="@color/base_app_color" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -66,7 +66,7 @@
         android:textSize="20pt"
         android:text="19:30"
         android:layout_marginTop="20dp"
-        android:textColor="#79103fff"
+        android:textColor="@color/base_app_color"
         android:layout_weight="1" />
 
     <Button
@@ -76,6 +76,7 @@
         android:shadowColor="@color/base_app_color"
         android:singleLine="false"
         android:textColor="@color/base_app_color"
-        android:hint="Search" />
+        android:hint="Search"
+        style="@style/MainButton" />
 
 </LinearLayout>
