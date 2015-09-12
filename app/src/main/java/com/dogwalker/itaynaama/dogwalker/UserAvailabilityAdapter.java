@@ -8,7 +8,6 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import java.util.Calendar;
 
 /**
  * Adapter which holds a list of user availabilities. The adapter is responsible for generating the

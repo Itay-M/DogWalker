@@ -6,10 +6,8 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.widget.DatePicker;
-import android.widget.TextView;
 
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * A dialog fragment which let the user to select a date.

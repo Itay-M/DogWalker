@@ -1,15 +1,13 @@
 package com.dogwalker.itaynaama.dogwalker;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import com.parse.ParseGeoPoint;
 
+import com.parse.ParseGeoPoint;
 
 import java.util.ArrayList;
 

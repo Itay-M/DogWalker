@@ -13,11 +13,8 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.location.Address;
 import android.util.Log;
-import android.widget.Adapter;
 import android.widget.EditText;
-import android.widget.ListAdapter;
 import android.widget.Toast;
-import android.widget.WrapperListAdapter;
 
 import com.parse.ParseException;
 import com.parse.ParseUser;
@@ -26,10 +23,8 @@ import com.parse.RequestPasswordResetCallback;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-import java.net.ConnectException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Utility class
