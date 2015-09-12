@@ -98,7 +98,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,A
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         ParseObject request = (ParseObject)parent.getAdapter().getItem(position);
-        Intent i = WalkerRequestActivity.prepareIntent(MainActivity.this, request);
+        Intent i = WalkerRequestActivity.prepareIntent(MainActivity.this, request,view.getTag().toString());
         startActivity(i);
     }
 
@@ -117,6 +117,7 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,A
         requestsQuery.include("from");
         requestsQuery.addDescendingOrder("datePickup");
         requestsQuery.addDescendingOrder("timePickup");
+        //requestsQuery.setLimit(20);
         requestsQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> requests, ParseException e) {
@@ -155,10 +156,11 @@ public class MainActivity extends BaseActivity implements View.OnClickListener,A
 
         // perform search in background
         ParseQuery<ParseObject> requestsQuery = new ParseQuery<>("Requests");
-        requestsQuery.whereEqualTo("from",ParseUser.getCurrentUser());
+        requestsQuery.whereEqualTo("from", ParseUser.getCurrentUser());
         requestsQuery.include("to");
         requestsQuery.addDescendingOrder("datePickup");
         requestsQuery.addDescendingOrder("timePickup");
+        //requestsQuery.setLimit(20);
         requestsQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> requests, ParseException e) {

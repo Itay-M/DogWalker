@@ -17,11 +17,8 @@ import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -45,21 +42,39 @@ import org.json.JSONException;
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 
-public class ProfileEdit extends AppCompatActivity implements View.OnClickListener {
+public class ProfileEditActivity extends AppCompatActivity implements View.OnClickListener {
+    /**
+     * Request code to identify response from the camera
+     */
     private static final int CAMERA_REQUEST = 0;
+    /**
+     * Request code to identify response from the address selection activity
+     */
     private static final int REQUEST_ADDRESS = 1;
+
+    // UI components
     protected EditText nameEdit,addressEdit,phoneEdit;
     protected Button resetPassword, saveChangesB, changePicB;
-    protected ImageView curruserPic;
-    protected ParseUser currentUser = ParseUser.getCurrentUser();
-    protected UserAvailabilityAdapter availabilityAdapter;
-    protected List<ParseObject> userAvailabilitiesList;
-    protected ParseFile photoFile;
-    protected byte[] picByteArray;
-    protected Bitmap bmPic;
-    protected Address address;
+    protected ImageView userPic;
     protected Switch phoneShareEdit;
-    protected Boolean shareSwitch;
+
+    /**
+     * The list of UserAvailabilities - used for updating/removing/inserting
+     */
+    protected List<ParseObject> userAvailabilitiesList;
+    /**
+     * The adapter used by the user availabilities list - use for checking which should be
+     * removed/updated/inserted
+     */
+    protected UserAvailabilityAdapter availabilityAdapter;
+    /**
+     * The byte array of the picture selected by the user (null while not picture selected / changed)
+     */
+    protected byte[] picByteArray;
+    /**
+     * The address selected by ther user (null while not selected / changed)
+     */
+    protected Address address;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -67,58 +82,43 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile_edit);
 
-        curruserPic = (ImageView)findViewById(R.id.view_curr_pic);
+        ParseUser currentUser = ParseUser.getCurrentUser();
 
-        //show profile picture in the imageView
-        ParseFile p = (ParseFile) currentUser.get("Photo");
-        if(p!=null) {
-            try {
-                Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
-                curruserPic.setImageBitmap(b);
-            } catch (ParseException e) {
-                Log.d("My Loggggg", e.getMessage().toString());
-            }
-        }
-
+        // get UI components
+        userPic = (ImageView)findViewById(R.id.view_curr_pic);
         nameEdit = (EditText) findViewById(R.id.profile_name_edit);
         addressEdit = (EditText) findViewById(R.id.profile_address_edit);
         phoneEdit = (EditText)findViewById(R.id.profile_user_phone_edit);
         phoneShareEdit = (Switch)findViewById(R.id.phone_switch_edit);
-
-        nameEdit.setHint(currentUser.get("Name").toString());
-        addressEdit.setHint(Utils.addressToString(currentUser.getJSONArray("address")));
-        phoneEdit.setHint(currentUser.get("Phone").toString());
-        phoneShareEdit.setChecked((Boolean) currentUser.get("sharePhone"));
-
-        phoneShareEdit.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked) {
-                shareSwitch = isChecked;
-            }
-        });
-
         resetPassword = (Button) findViewById(R.id.reset_password_button);
         saveChangesB = (Button) findViewById(R.id.save_changes_button);
         changePicB = (Button) findViewById(R.id.change_pic_button);
 
+        // init ui components with user details
+        ParseFile p = (ParseFile) currentUser.get("photo");
+        if(p!=null) {
+            try {
+                Bitmap b = BitmapFactory.decodeByteArray(p.getData(), 0, p.getData().length);
+                userPic.setImageBitmap(b);
+            } catch (ParseException e) {
+                Log.d("ProfileEdit", e.getMessage());
+            }
+        }
+        nameEdit.setHint(currentUser.get("name").toString());
+        addressEdit.setHint(Utils.addressToString(currentUser.getJSONArray("address")));
+        phoneEdit.setHint(currentUser.get("phone").toString());
+        phoneShareEdit.setChecked(currentUser.getBoolean("sharePhone"));
         resetPassword.setOnClickListener(this);
         saveChangesB.setOnClickListener(this);
         changePicB.setOnClickListener(this);
 
+        // handle address selection
         ImageButton addressChangeButton = (ImageButton)findViewById(R.id.profile_address_change_edit);
-        addressChangeButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent addressSelectionIntent = new Intent(ProfileEdit.this, AddressSelectionActivity.class);
-                startActivityForResult(addressSelectionIntent, REQUEST_ADDRESS);
-            }
-        });
+        addressChangeButton.setOnClickListener(this);
 
-        // user availability
-        availabilityAdapter = new UserAvailabilityAdapter(this);
+        // handle user availability changes
         final LinearLayout availabilityItems = (LinearLayout)findViewById(R.id.edit_profile_availability_items);
-
-        // connect between adapter to component
+        availabilityAdapter = new UserAvailabilityAdapter(this);
         availabilityAdapter.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
@@ -135,10 +135,9 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
             }
         });
 
-        // take all data of availability of current user
+        // query all availability of current user and fill the adapter
         final ParseQuery<ParseObject> userAvailabilityQuery = new ParseQuery<>("UserAvailability");
         userAvailabilityQuery.whereEqualTo("user", currentUser);
-
         userAvailabilityQuery.findInBackground(new FindCallback<ParseObject>() {
             @Override
             public void done(List<ParseObject> userAvailabilities, ParseException e) {
@@ -167,88 +166,46 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
     }
 
     @Override
-    public void onClick(View v)
-    {
-        switch (v.getId())
-        {
+    public void onClick(View v) {
+        ParseUser currentUser = ParseUser.getCurrentUser();
+
+        switch (v.getId()) {
             case (R.id.reset_password_button):
-                final android.support.v7.app.AlertDialog.Builder alertBuilder = new android.support.v7.app.AlertDialog.Builder(this);
-                final EditText input = new EditText(this);
-                input.setHint("enter your email address here...");
-                alertBuilder.setMessage("Do you want to reset your password \n(sending reset to your mail)")
-                        .setPositiveButton("Send reset", new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which)
-                            {
-                                //send the reset to the mail, if not successful print exception.
-                                ParseUser.requestPasswordResetInBackground(input.getText().toString().toLowerCase(), new RequestPasswordResetCallback()
-                                {
-                                    @Override
-                                    public void done(ParseException e)
-                                    {
-                                        if (e == null)
-                                        {
-                                            Toast.makeText(getApplicationContext(), "reset sent successfully to your email", Toast.LENGTH_LONG).show();
-                                        }
-                                        else
-                                        {
-                                            Log.d("My Loggggg", e.getMessage());
-                                            Toast.makeText(getApplicationContext(), "error" + e.getMessage(), Toast.LENGTH_LONG).show();
-                                        }
-                                    }
-                                });
-                            }
-                        })
-                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Log.d("My Loggggg", "user canceled reset");
-                            }
-                        });
-                alertBuilder.setView(input);
-                alertBuilder.show();
+                Utils.resetPassword(ProfileEditActivity.this,currentUser.getEmail());
                 break;
 
             case (R.id.save_changes_button):
-                if (!(nameEdit.getText().toString().isEmpty()))
-                {
-                    Log.d("My Loggggg", "name changed");
-                    currentUser.put("Name", nameEdit.getText().toString());
+
+                // handle name
+                String name = nameEdit.getText().toString();
+                if (!name.isEmpty()) {
+                    currentUser.put("name", name);
                 }
 
-                if (address!=null)
-                {
-                    Log.d("My Loggggg", "address changed");
+                // handle address
+                if (address!=null) {
                     currentUser.put("address", Utils.addressToJSONArray(address));
                     currentUser.put("addressLocation",new ParseGeoPoint(address.getLatitude(),address.getLongitude()));
                 }
 
-                if (!(phoneEdit.getText().toString().isEmpty()))
-                {
-                    Log.d("My Loggggg", "phone changed");
-                    currentUser.put("Phone", phoneEdit.getText().toString());
+                // handle phone number
+                String phone = phoneEdit.getText().toString();
+                if (!phone.isEmpty()) {
+                    currentUser.put("phone", phone);
                 }
+                currentUser.put("sharePhone",phoneShareEdit.isChecked());
 
-                currentUser.put("sharePhone",shareSwitch);
-
-                //if the new user took a profile picture - save it to parse data base
-                if (picByteArray != null)
-                {
+                // handle profile picture (save before proceeding
+                if (picByteArray != null) {
                     Log.d("My Loggggg", "profile picture changed");
-                    Toast.makeText(getApplicationContext(), "saving photo", Toast.LENGTH_LONG).show();
-                    photoFile = new ParseFile(currentUser.getUsername().toString()+"profile_pic.jpg",picByteArray);
+                    ParseFile photoFile = new ParseFile(currentUser.getUsername().toString()+"profile_pic.jpg",picByteArray);
 
-                    try
-                    {
+                    try {
                         photoFile.save();
+                    }catch (ParseException e) {
+                        Log.d("ProfileEdit", "Saving picture failed: "+e.getMessage().toString());
                     }
-                    catch (ParseException e)
-                    {
-                        Log.d("My Loggggg", e.getMessage().toString());
-                    }
-                    currentUser.put("Photo", photoFile);
-//                    currentUser.saveInBackground();
+                    currentUser.put("photo", photoFile);
                 }
 
                 //save changes in user availability
@@ -282,19 +239,15 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
                     }
                 }
 
-                try
-                {
+                // save user details
+                try {
                     currentUser.save();
-                    Toast.makeText(getApplicationContext(), "changes saved successfully", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), "Changes saved successfully", Toast.LENGTH_LONG).show();
+                    finish();
+                }catch (ParseException e) {
+                    Log.e("ProfileEdit", "error saving changes: "+e.getMessage());
+                    Utils.showMessageBox(ProfileEditActivity.this, "Failed saving changes", getString(R.string.unknown_error_occur));
                 }
-                catch (ParseException e)
-                {
-                    Toast.makeText(getApplicationContext(), "error! changes didn't saved", Toast.LENGTH_LONG).show();
-                    Log.d("My Loggggg", "error saving changes");
-                    e.printStackTrace();
-                }
-
-                finish();
 
                 break;
 
@@ -302,6 +255,15 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
                 // create Intent to take a picture and return control to the calling application
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 startActivityForResult(intent, CAMERA_REQUEST);
+
+                break;
+
+            case R.id.profile_address_change_edit:
+                // move user to address selection activity
+                Intent addressSelectionIntent = new Intent(ProfileEditActivity.this, AddressSelectionActivity.class);
+                startActivityForResult(addressSelectionIntent, REQUEST_ADDRESS);
+
+                break;
         }
     }
 
@@ -310,49 +272,25 @@ public class ProfileEdit extends AppCompatActivity implements View.OnClickListen
     {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST)
-        {
+        if (resultCode == RESULT_OK && requestCode == CAMERA_REQUEST) {
+
             //get the photo
-            bmPic = (Bitmap) data.getExtras().get("data");
+            Bitmap bmPic = (Bitmap) data.getExtras().get("data");
             //convert and scale the photo
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
             bmPic.compress(Bitmap.CompressFormat.JPEG,100,stream);
             //put the photo in byte array
             picByteArray = stream.toByteArray();
             //present the photo that is going to be save in circle view
-            curruserPic.setImageBitmap(getCircleBitmap(bmPic));
+            userPic.setImageBitmap(Utils.getCircleBitmap(bmPic));
+
         }else if(resultCode == RESULT_OK && requestCode == REQUEST_ADDRESS){
 
+            // save the selected address
             Address address = data.getParcelableExtra("address");
-            addressEdit.setText(Utils.addressToString(address));
             this.address = address;
+            // upadte read-only component
+            addressEdit.setText(Utils.addressToString(address));
         }
-    }
-
-    /**
-     * convert a rectangle picture into a circle picture
-     * @param bitmap - the picture
-     * @return a rounded bitmap picture
-     */
-    private Bitmap getCircleBitmap(Bitmap bitmap)
-    {
-        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),bitmap.getHeight(), Bitmap.Config.ARGB_8888);
-        final Canvas canvas = new Canvas(output);
-        final int color = Color.RED;
-        final Paint paint = new Paint();
-        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
-        final RectF rectF = new RectF(rect);
-
-        paint.setAntiAlias(true);
-        canvas.drawARGB(0, 0, 0, 0);
-        paint.setColor(color);
-        canvas.drawOval(rectF, paint);
-
-        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
-        canvas.drawBitmap(bitmap, rect, rect, paint);
-
-        bitmap.recycle();
-
-        return output;
     }
 }

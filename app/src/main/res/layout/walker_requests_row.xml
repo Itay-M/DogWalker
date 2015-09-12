@@ -6,7 +6,7 @@
     <ImageView
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:id="@+id/imageView3"
+        android:id="@+id/walker_request_row_image"
         android:layout_marginRight="10dp"
         android:src="@drawable/logo_transparent"
         android:scaleType="fitCenter"

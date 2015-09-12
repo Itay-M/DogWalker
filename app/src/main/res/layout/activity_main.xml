@@ -11,14 +11,11 @@
         android:id="@+id/searchButton"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textSize="30sp"
         android:gravity="center"
         android:text="search walker"
         android:layout_gravity="center_horizontal"
-        android:background="@color/base_app_color"
-        android:textColor="#ffffff"
-        android:padding="10dp"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="20dp"
+        style="@style/MainButton" />
 
     <TextView
         android:layout_width="match_parent"
@@ -55,9 +52,10 @@
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/main_my_request_list"
+            android:id="@+id/main_walker_requests_list"
             android:layout_gravity="center_horizontal"
             android:choiceMode="singleChoice" />
+
     </LinearLayout>
 
     <TextView
@@ -96,7 +94,7 @@
         <ListView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/main_walker_requests_list"
+            android:id="@+id/main_my_request_list"
             android:layout_gravity="center_horizontal"
             android:choiceMode="singleChoice" />
 

@@ -2,14 +2,31 @@ package com.dogwalker.itaynaama.dogwalker;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.location.Address;
+import android.util.Log;
 import android.widget.Adapter;
+import android.widget.EditText;
 import android.widget.ListAdapter;
+import android.widget.Toast;
 import android.widget.WrapperListAdapter;
+
+import com.parse.ParseException;
+import com.parse.ParseUser;
+import com.parse.RequestPasswordResetCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
+import java.net.ConnectException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -94,8 +111,86 @@ public class Utils {
 
     static public String formatMinutesAsTime(int minutes){
         Calendar time = Calendar.getInstance();
-        time.set(Calendar.HOUR_OF_DAY,minutes/60);
+        time.set(Calendar.HOUR_OF_DAY, minutes / 60);
         time.set(Calendar.MINUTE, minutes % 60);
         return DISPLAY_TIME_FORMAT.format(time.getTime());
+    }
+
+    /**
+     * Send a reset password mail to the user. The user will be asked to fill his email address for
+     * identification.
+     *
+     * @param context the context used to show messages
+     */
+    static public void resetPassword(final Context context){
+        final android.support.v7.app.AlertDialog.Builder alertBuilder = new android.support.v7.app.AlertDialog.Builder(context);
+        final EditText input = new EditText(context);
+
+        alertBuilder
+                .setMessage("Fill in you email address.\nA link to reset your password will be sent to you email address.")
+                .setPositiveButton("Send Link", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        resetPassword(context, input.getText().toString());
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d("My Loggggg", "user canceled reset");
+                    }
+                });
+        alertBuilder.setView(input);
+        alertBuilder.show();
+    }
+
+    /**
+     * Send a reset password mail to the user. If provided with an @email address it will search
+     * for a user having this mail address and if found will send it a reset password mail. If no
+     * @email is provided the user will be asked to enter one.
+     *
+     * @param context the context used to show messages
+     * @param email the email address of the user (optional)
+     */
+    static public void resetPassword(final Context context, String email){
+        //send the reset to the mail, if not successful print exception.
+        ParseUser.requestPasswordResetInBackground(email.toLowerCase(), new RequestPasswordResetCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    Toast.makeText(context, "Reset password link sent successfully to your email", Toast.LENGTH_LONG).show();
+                } else {
+                    Log.d("ResetPassword", "Reset password failed: " + e.getMessage());
+                    Utils.showMessageBox(context, "Reset Password Failed", context.getString(R.string.unknown_error_occur));
+                }
+            }
+        });
+    }
+
+
+    /**
+     * convert a rectangle picture into a circle picture
+     * @param bitmap - the picture
+     * @return a rounded bitmap picture
+     */
+    static public Bitmap getCircleBitmap(Bitmap bitmap) {
+        final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(output);
+        final int color = Color.RED;
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        final RectF rectF = new RectF(rect);
+
+        paint.setAntiAlias(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(color);
+        canvas.drawOval(rectF, paint);
+
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(bitmap, rect, rect, paint);
+
+        bitmap.recycle();
+
+        return output;
     }
 }

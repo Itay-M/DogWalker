@@ -73,7 +73,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
 
         // handle date choosing
         final DatePickerFragment datePickerFragment = new DatePickerFragment();
-        datePickerFragment.getArguments().putSerializable("date",date);
+        datePickerFragment.setDefaultDate(date);
         dateText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,11 +83,10 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
 
         //handle time choosing
         final TimePickerFragment timePickerFragment = new TimePickerFragment();
+        timePickerFragment.setDefaultTime(date.get(Calendar.HOUR_OF_DAY)*60+date.get(Calendar.MINUTE));
         timeText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //PushReceiver.createPush(WalkerSearchActivity.this, ParseUser.getCurrentUser(),"01/01/01",
-                //      "10:30","Jerusalem");
                 timePickerFragment.show(getSupportFragmentManager(), "timePicker");
 
             }
@@ -237,10 +236,9 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
     }
 
     @Override
-    public void onTimeSelected(Calendar time) {
-
-        timeText.setText(Utils.DISPLAY_TIME_FORMAT.format(time.getTime()));
-        this.time = time.get(Calendar.HOUR_OF_DAY)*60+time.get(Calendar.MINUTE);
+    public void onTimeSelected(int time) {
+        timeText.setText(Utils.formatMinutesAsTime(time));
+        this.time = time;
     }
 
     /*
@@ -262,7 +260,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
         public ParseUserInfo(ParseUser user){
             username = user.getUsername();
             address = user.getString("address");
-            phone = user.getString("Phone");
+            phone = user.getString("phone");
             sharePhone = user.getBoolean("sharePhone");
             objectId = user.getObjectId();
             bornDate = user.getDate("bornDate");
@@ -270,7 +268,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
             addressLocationLat = addressLocation.getLatitude();
             addressLocationLng = addressLocation.getLongitude();
 
-            ParseFile p = user.getParseFile("Photo");
+            ParseFile p = user.getParseFile("photo");
             try{
                 if(p != null) {
                     profilePicture = p.getData();

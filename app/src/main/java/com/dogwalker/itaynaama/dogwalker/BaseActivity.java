@@ -101,7 +101,7 @@ public abstract class BaseActivity extends AppCompatActivity {
      * View the user's profile.
      */
     private void viewProfile(){
-        Intent i = new Intent(this, ProfileView.class);
+        Intent i = new Intent(this, ProfileViewActivity.class);
         startActivity(i);
     }
 

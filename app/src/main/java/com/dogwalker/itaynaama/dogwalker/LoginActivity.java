@@ -88,7 +88,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener
                     public void done(ParseUser parseUser, ParseException e)
                     {
                         if (e == null){
-                            Toast.makeText(getApplicationContext(), "user logged in successfully", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "user logged in successfully", Toast.LENGTH_SHORT).show();
 
                             // connect between installation app to login user
                             ParseInstallation installation = ParseInstallation.getCurrentInstallation();
@@ -99,7 +99,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener
                             startActivity(i);
                             finish();
                         }else{
-                            Utils.showMessageBox(getApplicationContext(),"Login Failed","no such user exist");
+                            Utils.showMessageBox(LoginActivity.this,"Login Failed","no such user exist");
                         }
                     }
                 });
@@ -107,41 +107,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener
                 break;
 
             case R.id.forgotPasswordButton:
-                //perform user password reset by sending a password reset request using provided email address.
-                final android.support.v7.app.AlertDialog.Builder alertBuilder = new android.support.v7.app.AlertDialog.Builder(this);
-                final EditText input = new EditText(this);
-
-                alertBuilder.setMessage("Do you want to reset your password \n(sending reset to your mail)")
-                    .setPositiveButton("Send reset", new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
-                        {
-                            //send the reset to the mail, if not successful print exception.
-                            ParseUser.requestPasswordResetInBackground(input.getText().toString().toLowerCase(), new RequestPasswordResetCallback()
-                            {
-                                @Override
-                                public void done(ParseException e)
-                                {
-                                if (e == null) {
-                                    Toast.makeText(getApplicationContext(), "reset sent successfully to your email", Toast.LENGTH_LONG).show();
-                                } else {
-                                    Log.d("Login", "Reset password failed "+e.getMessage());
-                                    Utils.showMessageBox(getApplicationContext(),"Reset Password Failed",getString(R.string.unknown_error_occur));
-                                }
-                                }
-                            });
-                        }
-                    })
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Log.d("My Loggggg", "user canceled reset");
-                        }
-                    });
-                alertBuilder.setView(input);
-                alertBuilder.show();
-
+                Utils.resetPassword(LoginActivity.this);
                 break;
 
             case R.id.login_register_button:

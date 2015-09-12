@@ -5,9 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.location.Address;
-import android.media.Image;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -28,7 +25,6 @@ import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 
 public class WalkerRequestActivity extends BaseActivity {
@@ -60,22 +56,19 @@ public class WalkerRequestActivity extends BaseActivity {
         }
 
         // update request that is open
-        ParseObject request = ParseObject.createWithoutData("Requests",requestId);
-
-        if(ParseUser.getCurrentUser().getObjectId().equals(userRequested.getObjectId())) {
+        if(ParseUser.getCurrentUser().getObjectId().equals(intent.getStringExtra("to"))) {
+            ParseObject request = ParseObject.createWithoutData("Requests",requestId);
             request.put("isRead", true);
             request.saveInBackground(new SaveCallback() {
                 public void done(ParseException e) {
-                    if (e == null) {
-                        // Saved successfully.
-                    } else {
+                    if (e != null) {
                         Log.e("WalkerRequestActivity","Failed updating request read status: "+e.getMessage());
                     }
                 }
             });
         }
 
-        ParseFile userImage = userRequested.getParseFile("Photo");
+        ParseFile userImage = userRequested.getParseFile("photo");
         if(userImage!=null) {
             try {
                 Bitmap b = BitmapFactory.decodeByteArray(userImage.getData(), 0, userImage.getData().length);
@@ -85,16 +78,16 @@ public class WalkerRequestActivity extends BaseActivity {
             }
         }
 
-        nameText.setText((String) userRequested.get("Name"));
+        nameText.setText((String) userRequested.get("name"));
         nameText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent viewProfile = new Intent(WalkerRequestActivity.this,ProfileView.class);
+                Intent viewProfile = new Intent(WalkerRequestActivity.this,ProfileViewActivity.class);
                 startActivity(viewProfile);
             }
         });
 
-        phoneText.setText((String)userRequested.get("Phone"));
+        phoneText.setText((String)userRequested.get("phone"));
 
         Date date = (Date)intent.getSerializableExtra("date");
         dateText.setText(Utils.DISPLAY_DATE_FORMAT.format(date));
@@ -140,8 +133,8 @@ public class WalkerRequestActivity extends BaseActivity {
     /**
      * prepare a new intent based on the given request which can be used to start this activity
      */
-    static public Intent prepareIntent(Context context, ParseObject request){
-        ParseUser reqUser = request.getParseUser("from");
+    static public Intent prepareIntent(Context context, ParseObject request, String userKey){
+        ParseUser reqUser = request.getParseUser(userKey);
         Date pickupDate = request.getDate("datePickup");
         int pickupTime = request.getInt("timePickup");
         JSONArray pickupAddressLines = request.getJSONArray("address");
@@ -160,6 +153,7 @@ public class WalkerRequestActivity extends BaseActivity {
         resultIntent.putExtra("reqId", request.getObjectId());
         resultIntent.putExtra("date", pickupDate);
         resultIntent.putExtra("time", pickupTime);
+        resultIntent.putExtra("to", request.getParseUser("to").getObjectId());
         resultIntent.putExtra("user",reqUser.getObjectId());
         resultIntent.putStringArrayListExtra("address", pickupAddress);
         resultIntent.putExtra("addressLat", addressLocation.getLatitude());

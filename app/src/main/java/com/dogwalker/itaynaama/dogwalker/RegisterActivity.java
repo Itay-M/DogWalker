@@ -57,7 +57,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     Bitmap bmPic;
     private UserAvailabilityAdapter availabilityAdapter;
     protected Switch phoneSwitch;
-    protected Boolean sharePhone = false;
+    protected boolean sharePhone = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -153,9 +153,9 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                 user.setUsername(usernameET.getText().toString());
                 user.setPassword(passwordET.getText().toString());
                 user.setEmail(emailET.getText().toString().toLowerCase());
-                user.put("Name", nameET.getText().toString());
+                user.put("name", nameET.getText().toString());
                 user.put("address", Utils.addressToJSONArray(address));
-                user.put("Phone", phoneET.getText().toString());
+                user.put("phone", phoneET.getText().toString());
                 user.put("addressLocation",new ParseGeoPoint(address.getLatitude(),address.getLongitude()));
                 user.put("sharePhone",sharePhone);
 
@@ -181,7 +181,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
                     } catch (ParseException e){
                         Log.d("My Loggggg", e.getMessage());
                     }
-                    user.put("Photo", photoFile);
+                    user.put("photo", photoFile);
                     user.saveInBackground();
                 }
 

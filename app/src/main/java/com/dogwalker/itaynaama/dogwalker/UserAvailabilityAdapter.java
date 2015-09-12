@@ -67,13 +67,14 @@ public class UserAvailabilityAdapter extends ArrayAdapter<AvailabilityRecord> im
 
     @Override
     public void onClick(final View v) {
+        final AvailabilityRecord record = (AvailabilityRecord)v.getTag();
+
         switch(v.getId()){
             case R.id.availability_row_remove:
-                remove((AvailabilityRecord)v.getTag());
+                remove(record);
                 notifyDataSetChanged();
                 break;
             case R.id.availability_row_add:
-                AvailabilityRecord record = (AvailabilityRecord)v.getTag();
                 if(record.isValid()) {
                     add(new AvailabilityRecord());
                     notifyDataSetChanged();
@@ -82,22 +83,22 @@ public class UserAvailabilityAdapter extends ArrayAdapter<AvailabilityRecord> im
                 }
                 break;
             case R.id.availability_row_from:
+                timePicker.setDefaultTime(record.getTimeFrom());
                 timePicker.setListener(new TimePickerFragment.TimePickerListener() {
                     @Override
-                    public void onTimeSelected(Calendar time) {
-                        AvailabilityRecord record = (AvailabilityRecord)v.getTag();
-                        record.setTimeFrom(time.get(Calendar.HOUR_OF_DAY)*60+time.get(Calendar.MINUTE));
+                    public void onTimeSelected(int time) {
+                        record.setTimeFrom(time);
                         notifyDataSetChanged();
                     }
                 });
                 timePicker.show(((FragmentActivity)getContext()).getSupportFragmentManager(),"timePicker");
                 break;
             case R.id.availability_row_until:
+                timePicker.setDefaultTime(record.getTimeUntil());
                 timePicker.setListener(new TimePickerFragment.TimePickerListener() {
                     @Override
-                    public void onTimeSelected(Calendar time) {
-                        AvailabilityRecord record = (AvailabilityRecord) v.getTag();
-                        record.setTimeUntil(time.get(Calendar.HOUR_OF_DAY) * 60 + time.get(Calendar.MINUTE));
+                    public void onTimeSelected(int time) {
+                        record.setTimeUntil(time);
                         notifyDataSetChanged();
                     }
                 });

@@ -152,6 +152,7 @@ public class GeocoderAutocompleteAdapter extends ArrayAdapter<GeocoderAutocomple
     }
 
     @Override
+    //todo
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.e("GeocoderAutocomplete","Google Client failed to connect: error #"+connectionResult.getErrorCode());
     }

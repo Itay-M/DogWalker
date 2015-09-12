@@ -22,19 +22,32 @@ public class DatePickerFragment extends DialogFragment
      */
     private DatePickerListener listener;
 
-    public DatePickerFragment(){
-        super();
+    /**
+     * Set the default date that will be used by the dialog when created. By default the first
+     * date to show will be the current date, and later the last selected date will be in use.
+     *
+     * @param date the default date to set
+     */
+    public void setDefaultDate(Calendar date){
+        if(getArguments()==null){
+            setArguments(new Bundle());
+        }
+        getArguments().putSerializable("date",Calendar.getInstance());
+    }
 
-        Bundle arguments = new Bundle();
-        arguments.putSerializable("date",Calendar.getInstance());
-        setArguments(arguments);
+    /**
+     * Get the default date to display on dialog creation
+     */
+    protected Calendar getDefaultDate(){
+        Calendar d = (getArguments()==null?null:(Calendar)getArguments().getSerializable("date"));
+        return d==null?Calendar.getInstance():d;
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
 
-        // backward compatibility - check if the activity implement the lisener interface and use it
+        // backward compatibility - check if the activity implement the listener interface and use it
         // as a listener
         if(activity instanceof DatePickerListener && listener==null)
             listener = (DatePickerListener)activity;
@@ -43,7 +56,7 @@ public class DatePickerFragment extends DialogFragment
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         // get current date
-        Calendar date = (Calendar)getArguments().getSerializable("date");
+        Calendar date = getDefaultDate();
 
         // Use the current date as the default date in the picker
         int year = date.get(Calendar.YEAR);
@@ -62,7 +75,7 @@ public class DatePickerFragment extends DialogFragment
         Calendar date = Calendar.getInstance();
         date.set(year, month, day);
         // update fragment date
-        getArguments().putSerializable("date",date);
+        getArguments().putSerializable("date", date);
         // notify listener (if any)
         if(listener!=null) {
             listener.onDateSelected(date);
