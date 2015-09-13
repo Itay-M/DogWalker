@@ -1,5 +1,6 @@
 package com.dogwalker.itaynaama.dogwalker;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.DataSetObserver;
 import android.graphics.Bitmap;
@@ -26,12 +27,17 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 import java.util.List;
+
+import bolts.Continuation;
+import bolts.Task;
 
 public class ProfileEditActivity extends AppCompatActivity implements View.OnClickListener {
     /**
@@ -158,7 +164,7 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
 
     @Override
     public void onClick(View v) {
-        ParseUser currentUser = ParseUser.getCurrentUser();
+        final ParseUser currentUser = ParseUser.getCurrentUser();
 
         switch (v.getId()) {
             case (R.id.reset_password_button):
@@ -192,19 +198,23 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
                 if (!phone.isEmpty()) {
                     currentUser.put("phone", phone);
                 }
-                currentUser.put("sharePhone",phoneShareEdit.isChecked());
+                currentUser.put("sharePhone", phoneShareEdit.isChecked());
+
+                final ProgressDialog pd = ProgressDialog.show(ProfileEditActivity.this,"","Saving profile...",true,false);
+                List<Task<Void>> tasks = new ArrayList<>();
 
                 // handle profile picture (save before proceeding
                 if (picByteArray != null) {
                     Log.d("My Loggggg", "profile picture changed");
-                    ParseFile photoFile = new ParseFile(currentUser.getUsername().toString()+"profile_pic.jpg",picByteArray);
+                    final ParseFile photoFile = new ParseFile(currentUser.getUsername().toString()+"profile_pic.jpg",picByteArray);
 
-                    try {
-                        photoFile.save();
-                    }catch (ParseException e) {
-                        Log.d("ProfileEdit", "Saving picture failed: "+e.getMessage().toString());
-                    }
-                    currentUser.put("photo", photoFile);
+                    tasks.add(photoFile.saveInBackground().onSuccess(new Continuation<Void, Void>() {
+                        @Override
+                        public Void then(Task<Void> task) throws Exception {
+                            currentUser.put("photo", photoFile);
+                            return null;
+                        }
+                    }));
                 }
 
                 //save changes in user availability
@@ -214,39 +224,42 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
                     if(id != null){
                         // update if need old records
                         ParseObject userAvailability = userAvailabilitiesList.get(id);
-                        userAvailabilitiesList.set(id,null);
+                        userAvailabilitiesList.set(id, null);
                         record.toParseObject(userAvailability);
-                        userAvailability.saveInBackground();
+                        tasks.add(userAvailability.saveInBackground());
                     }else{
                         // else is a new record
                         ParseObject newUserAvailability = record.toParseObject();
                         newUserAvailability.put("user",currentUser);
-                        newUserAvailability.saveInBackground();
+                        tasks.add(newUserAvailability.saveInBackground());
                     }
                 }
                 // remove from parse all availabilities that user remove
                 for(ParseObject availability: userAvailabilitiesList) {
                     if(availability!=null) {
-                        availability.deleteInBackground(new DeleteCallback() {
-                            @Override
-                            public void done(ParseException e) {
-                                if(e!=null){
-                                    Log.e("DeleteParseObject", e.getMessage());
-                                }
-                            }
-                        });
+                        tasks.add(availability.deleteInBackground());
                     }
                 }
-
-                // save user details
-                try {
-                    currentUser.save();
-                    Toast.makeText(getApplicationContext(), "Changes saved successfully", Toast.LENGTH_LONG).show();
-                    finish();
-                }catch (ParseException e) {
-                    Log.e("ProfileEdit", "error saving changes: "+e.getMessage());
-                    Utils.showMessageBox(ProfileEditActivity.this, "Failed saving changes", getString(R.string.unknown_error_occur));
-                }
+                
+                Task.whenAll(tasks).onSuccessTask(new Continuation<Void, Task<Void>>() {
+                    @Override
+                    public Task<Void> then(Task<Void> task) throws Exception {
+                        return currentUser.saveInBackground();
+                    }
+                }).continueWith(new Continuation<Void, Void>() {
+                    @Override
+                    public Void then(Task<Void> task) throws Exception {
+                        pd.dismiss();
+                        if(!task.isFaulted()){
+                            Toast.makeText(getApplicationContext(), "Changes saved successfully", Toast.LENGTH_LONG).show();
+                            finish();
+                        }else{
+                            Log.e("ProfileEdit", "error saving changes: "+task.getError().getMessage());
+                            Utils.showMessageBox(ProfileEditActivity.this, "Failed saving changes", getString(R.string.unknown_error_occur));
+                        }
+                        return null;
+                    }
+                },Task.UI_THREAD_EXECUTOR);
 
                 break;
 

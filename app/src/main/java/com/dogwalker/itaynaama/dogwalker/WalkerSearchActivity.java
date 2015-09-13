@@ -341,7 +341,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
          */
         public double getAge() {
             Calendar today = Calendar.getInstance();
-            return (today.getTimeInMillis()-bornDate.getTime())/1000/60/60/24/365;
+            return (today.getTimeInMillis()-bornDate.getTime())/1000.0/60/60/24/365;
         }
 
         public String getPhone() {

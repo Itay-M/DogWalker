@@ -62,7 +62,7 @@ public class UserSelectionListAdapter extends ArrayAdapter<WalkerSearchActivity.
         }
 
         // show the age of user
-        age.setText((((int)(user.getAge()*10))/10.0)+" years old");
+        age.setText((int)user.getAge()+" years old");
 
         // show the user phone (if he allow it)
         if(user.isSharePhone()){
