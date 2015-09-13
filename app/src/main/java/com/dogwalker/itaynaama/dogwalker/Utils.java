@@ -115,8 +115,10 @@ public class Utils {
      */
     static public JSONArray addressToJSONArray(Address address){
         JSONArray addressLines = new JSONArray();
-        for (int i=0; i<=address.getMaxAddressLineIndex();i++){
-            addressLines.put(address.getAddressLine(i));
+        if(address!=null) {
+            for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+                addressLines.put(address.getAddressLine(i));
+            }
         }
         return addressLines;
     }

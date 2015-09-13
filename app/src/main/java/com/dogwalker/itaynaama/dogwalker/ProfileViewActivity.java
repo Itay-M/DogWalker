@@ -103,6 +103,7 @@ public class ProfileViewActivity extends BaseActivity implements View.OnClickLis
 
         // user availability
         final GridLayout availabilityItems = (GridLayout)findViewById(R.id.view_availability_items);
+        availabilityItems.removeAllViews();
         final ParseQuery<ParseObject> userAvailabilityQuery = new ParseQuery<>("UserAvailability");
         userAvailabilityQuery.whereEqualTo("user", user);
         userAvailabilityQuery.orderByAscending("startTime");
