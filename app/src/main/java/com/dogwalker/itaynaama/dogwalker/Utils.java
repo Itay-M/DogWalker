@@ -89,7 +89,7 @@ public class Utils {
     static public String addressToString(JSONArray addr,String sep){
         if(addr==null) return "";
 
-        /*StringBuilder res = new StringBuilder();
+        StringBuilder res = new StringBuilder();
         for(int i=0;i<addr.length();i++){
             try {
                 res.append(addr.getString(i));
@@ -98,13 +98,7 @@ public class Utils {
                 res.append(sep);
             }
         }
-        return res.toString();*/
-
-        try {
-            return addr.join(sep);
-        } catch (JSONException e) {
-            return "";
-        }
+        return res.toString();
     }
 
     /**
