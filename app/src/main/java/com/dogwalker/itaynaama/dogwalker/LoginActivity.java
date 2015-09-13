@@ -96,8 +96,10 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener
                             Intent i = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(i);
                             finish();
-                        }else{
-                            Utils.showMessageBox(LoginActivity.this,"Login Failed","no such user exist");
+                        }
+                        else
+                        {
+                            Toast.makeText(LoginActivity.this, "user logged in failed!  check login details", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
