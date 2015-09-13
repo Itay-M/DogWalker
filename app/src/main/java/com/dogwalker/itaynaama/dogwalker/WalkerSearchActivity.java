@@ -1,5 +1,6 @@
 package com.dogwalker.itaynaama.dogwalker;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.location.Address;
 import android.os.Bundle;
@@ -161,11 +162,19 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                         .include("user")
                         .whereNotEqualTo("user", ParseUser.getCurrentUser());
 
+                final ProgressDialog pd = ProgressDialog.show(WalkerSearchActivity.this,"","Looking for Walkers...",true,false);
 
                 // retrieval all users from DB
                 availabilityQuery.findInBackground(new FindCallback<ParseObject>() {
                     public void done(List<ParseObject> usersAvailability, ParseException e) {
+                        pd.dismiss();
+
                         if (e == null) {
+                            if(usersAvailability.isEmpty()){
+                                Utils.showMessageBox(WalkerSearchActivity.this,"No Walkers Found","No walkers matching your search conditions have found.");
+                                return;
+                            }
+
                             // build list of all users' info
                             Map<String,ParseUserInfo> users = new HashMap<>();
                             for (final ParseObject userAvailability : usersAvailability) {
@@ -186,6 +195,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                             startActivityForResult(usersSelectionIntent, REQUEST_USER);
                         } else {
                             Log.e("WalkerSearchActivity", "Failed getting users: " + e.getMessage());
+                            Utils.showMessageBox(WalkerSearchActivity.this, "Search Failed", getString(R.string.unknown_error_occur));
                         }
                     }
                 });
