@@ -167,6 +167,14 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
 
             case (R.id.save_changes_button):
 
+                // check that all the user availabilities are valid
+                for(int i=0;i<availabilityAdapter.getCount()-1;i++){
+                    if(!availabilityAdapter.getItem(i).isValid()){
+                        Utils.showMessageBox(v.getContext(),"Invalid period","At least one of the availability period are invalid");
+                        return;
+                    }
+                }
+
                 // handle name
                 String name = nameEdit.getText().toString();
                 if (!name.isEmpty()) {
@@ -273,7 +281,7 @@ public class ProfileEditActivity extends AppCompatActivity implements View.OnCli
             //put the photo in byte array
             picByteArray = stream.toByteArray();
             //present the photo that is going to be save in circle view
-            userPic.setImageBitmap(Utils.getCircleBitmap(bmPic));
+            userPic.setImageBitmap(bmPic);
 
         }else if(resultCode == RESULT_OK && requestCode == REQUEST_ADDRESS){
 

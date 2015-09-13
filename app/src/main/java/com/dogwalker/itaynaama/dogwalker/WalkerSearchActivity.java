@@ -30,7 +30,10 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 /**
  * The activity allow the user to search for a walker based on an address and date and time which
@@ -158,21 +161,22 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
                         .include("user")
                         .whereNotEqualTo("user", ParseUser.getCurrentUser());
 
+
                 // retrieval all users from DB
                 availabilityQuery.findInBackground(new FindCallback<ParseObject>() {
                     public void done(List<ParseObject> usersAvailability, ParseException e) {
                         if (e == null) {
                             // build list of all users' info
-                            ArrayList<ParseUserInfo> users = new ArrayList<>();
+                            Map<String,ParseUserInfo> users = new HashMap<>();
                             for (final ParseObject userAvailability : usersAvailability) {
                                 ParseUser user = userAvailability.getParseUser("user");
-                                users.add(new ParseUserInfo(user));
+                                users.put(user.getObjectId(),new ParseUserInfo(user));
                             }
 
                             // create an intent for the user selection activity with all the
                             // returned users
                             Intent usersSelectionIntent = new Intent(WalkerSearchActivity.this, UserSelectionActivity.class);
-                            usersSelectionIntent.putExtra("users", users);
+                            usersSelectionIntent.putExtra("users", new ArrayList<ParseUserInfo>(users.values()));
                             // add the pickup address location to the intent (for the distance
                             // calculation)
                             usersSelectionIntent.putExtra("addressLocationLng", address.getLongitude());
@@ -337,7 +341,7 @@ public class WalkerSearchActivity extends BaseActivity implements DatePickerFrag
          */
         public double getAge() {
             Calendar today = Calendar.getInstance();
-            return (today.getTimeInMillis()-bornDate.getTime())/1000.0/60/60/24/365;
+            return (today.getTimeInMillis()-bornDate.getTime())/1000/60/60/24/365;
         }
 
         public String getPhone() {

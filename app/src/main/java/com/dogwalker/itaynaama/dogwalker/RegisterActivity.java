@@ -229,7 +229,7 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
             //put the photo in byte array
             picByteArray = stream.toByteArray();
             //present the photo that is going to be save in circle view
-            newProfilePicIV.setImageBitmap(Utils.getCircleBitmap(bmPic));
+            newProfilePicIV.setImageBitmap(bmPic);
 
         }else if(resultCode == RESULT_OK && requestCode == REQUEST_ADDRESS){
 

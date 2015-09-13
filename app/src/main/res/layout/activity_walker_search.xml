@@ -73,10 +73,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/walker_search_search_btn"
-        android:shadowColor="@color/base_app_color"
         android:singleLine="false"
-        android:textColor="@color/base_app_color"
-        android:hint="Search"
-        style="@style/MainButton" />
+        style="@style/MainButton"
+        android:text="Search" />
 
 </LinearLayout>
